@@ -34,13 +34,11 @@ $config['methods'] = array(
 		'login' => array(
 			'text' => 'Login (local)',
 			'href' => SpecialPage::getTitleFor('Userlogin')->escapeFullURL(),
-			//'href' => '',
 		),
 		
 		'logout' => array(
 			'text' => 'Logout (local)',
 			'href' => SpecialPage::getTitleFor('Userlogout')->escapeFullURL(),
-			//'href' => '',
 		),
 		
 		'attributes' => array(),
@@ -51,7 +49,7 @@ $config['methods'] = array(
 	/**************************************************************************/
 	
 	
-	'shib_sso-dev' => array(
+	'shibboleth-default' => array(
 		'login' => array(
 			'text' => 'Login (SSO)',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login?target={RETURN_URL}',
@@ -81,16 +79,14 @@ $config['methods'] = array(
 	 * SAMPLE
 	 * Shibboleth SP with some basic user mappings 
 	 */
-	'shibboleth-rrze' => array(
+	'sample-shibboleth-default' => array(
 		'login' => array(
-			'text' => 'SAMPLE - Login via Shibboleth SP (SSO)',
-			//'text' => 'Login via Shibboleth SP (RRZE-SSO)',
+			'text' => 'SAMPLE - Login via Shibboleth SP default target',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login?target={RETURN_URL}',
 		),
 	
 		'logout' => array(
 			'text' => 'SAMPLE - Logout (SLO)',
-			//'text' => 'Logout via Shibboleth SP (RRZE-SLO)',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
 		),
 		
@@ -104,11 +100,11 @@ $config['methods'] = array(
 	
 	/*
 	 * SAMPLE
-	 * Shibboleth SP with some login requirements
+	 * Same as above but with some login requirements
 	 */
-	'shibboleth-rrze-restricted' => array(
+	'sample-shibboleth-restricted' => array(
 		'login' => array(
-			'text' => 'SAMPLE - Login via Shibboleth SP with requirements (SSO)',
+			'text' => 'SAMPLE - Login via Shibboleth SP default target with requirements',
 			//'text' => 'Login via Shibboleth SP (RRZE-SSO)',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login?target={RETURN_URL}',
 		),
@@ -138,12 +134,12 @@ $config['methods'] = array(
 	/*
 	 * SAMPLE
 	 * Shibboleth SP using a preconfigured application target 
-	 * other than the default one (in this case for OpenID)  
+	 * other than the default one 
 	 */
-	'shibboleth-openid' => array(
+	'sample-shibboleth-someApp' => array(
 		'login' => array(
-			'text' => 'SAMPLE - Login via Shibboleth SP (OpenID)',
-			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login/OpenID?target={RETURN_URL}',
+			'text' => 'SAMPLE - Login via Shibboleth SP someApp target',
+			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login/someApp?target={RETURN_URL}',
 		),
 	
 		'logout' => array(
@@ -163,9 +159,9 @@ $config['methods'] = array(
 	 * SAMPLE
 	 * SimpleSamlPHP SP basic   
 	 */
-	'simplesamlphp-rrze' => array(
+	'sample-simplesamlphp-default' => array(
 		'login' => array(
-			'text' => 'SAMPLE - Login via SimpleSamlPHP SP (RRZE-SSO)',
+			'text' => 'SAMPLE - Login via SimpleSamlPHP SP default target',
 			'href' => WebFunctions::getBaseURL() .  '/simplesaml/saml2/sp/initSSO.php?RelayState={RETURN_URL}',
 		),
 	
@@ -183,13 +179,13 @@ $config['methods'] = array(
 	
 	/*
 	 * SAMPLE
-	 * SimpleSamlPHP SP using a preconfigured application target 
-	 * other than the default one (in this case for OpenID)  
+	 * SimpleSamlPHP SP using a preconfigured IdP as the
+	 * target IdP for user authentication
 	 */
-	'simplesamlphp-openid' => array(
+	'sample-simplesamlphp-someIdP' => array(
 		'login' => array(
-			'text' => 'SAMPLE - Login via SimpleSamlPHP SP (OpenID)',
-			'href' => WebFunctions::getBaseURL() .  '/simplesaml/saml2/sp/initSSO.php?RelayState={RETURN_URL}&idpentityid=' . wfUrlencode('https://sso-dev.rrze.uni-erlangen.de/simplesaml/saml2/idp/metadata.php'),
+			'text' => 'SAMPLE - Login via SimpleSamlPHP SP someIdP target',
+			'href' => WebFunctions::getBaseURL() .  '/simplesaml/saml2/sp/initSSO.php?RelayState={RETURN_URL}&idpentityid=' . wfUrlencode('someIdP'),
 		),
 	
 		'logout' => array(

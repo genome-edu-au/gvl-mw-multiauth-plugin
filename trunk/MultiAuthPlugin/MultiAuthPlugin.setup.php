@@ -24,8 +24,10 @@
 // Check to make sure we're actually in MediaWiki.
 if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a valid entry point.');
 	
-// FIXME GRRR: If this is not here simpleSAMLphp will not be able to retrieve its' session. This _seems_ to have no side effects.
-//session_start();
+// FIXME GRRR: If this is not here simpleSAMLphp will not be able to retrieve its' session. 
+// Also we might get other problems with saving the method name.
+// This _seems_ to have no side effects.
+session_start();
 
 require_once("MultiAuthPlugin.body.php");
 
@@ -173,7 +175,6 @@ function deferredMultiAuthSetup() {
 	// already uses URL building functions
 	// TODO File bug report that the cache needs a dirty flag!
 	global $wgContLang;
-	// $wgContLang->getSpecialPageAliases();
 	if (isset($wgContLang->mExtendedSpecialPageAliases))
 	unset($wgContLang->mExtendedSpecialPageAliases);
 

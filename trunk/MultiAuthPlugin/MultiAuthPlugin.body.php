@@ -21,6 +21,9 @@
  * USA, or see the FSF site: http://www.fsf.org.
  */
 
+// TODO create a Config class to hold all configuration information
+// TODO create a Method class
+
 // Check to make sure we're actually in MediaWiki.
 if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a valid entry point.');
 
@@ -89,9 +92,6 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		// start the whole thing up...
 		$this->config = array();
-		if (is_null($configFile)) {
-			$configFile = dirname(__FILE__) . '/MultiAuthPlugin.config.php';
-		}
 		$this->init($configFile);
 	}
 
@@ -100,22 +100,46 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * @param string $configFile
 	 * The path to the configuration file to be loaded
 	 */
-	private function init($configFile) {
-		// load configuration file
+	private function init($configFile = null) {
+		if (is_null($configFile)) {
+			$configFile = dirname(__FILE__) . '/MultiAuthPlugin.config.php';
+		}
 		$this->loadConfig($configFile);
-
 		if ($this->config['debug']['logServerVariables']) {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "*** SERVER: " . print_r($_SERVER, true));
 		}
-
-		// TODO load/init auth source libraries, e.g. SimpleSamlPHP
 		$this->retrieveAuthData();
-
 
 		// setup the authentication methods
 		$this->loadConfig($this->config['internal']['methodSetupFile']);
 	}
 
+	
+	/**
+	 * Load a $config array from the given file and merge
+	 * it in the MultiAuthPlugin's configuration
+	 * @param string $configFile
+	 * the path to the configuration file to be loaded
+	 * @return boolean Successfull execution
+	 */
+	private function loadConfig($configFile) {
+		if (!file_exists($configFile)) {
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "The specified configuration file '$configFile' does not exist.");
+			return false;
+		}
+
+		require($configFile);
+
+		if (!isset($config) || !is_array($config)) {
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "The specified configuration file '$configFile' does not contain a \$config array.");
+			return false;
+		}
+
+		$this->config = array_merge($this->config, $config);
+
+		return true;
+	}
+	
 	/**
 	 * Tries to retrieve the configured auth data (see internal->authData) from
 	 * its' methods and make it availabe in the global context for later usage
@@ -128,10 +152,12 @@ class MultiAuthPlugin extends AuthPlugin {
 		$libName = $this->config['internal']['authLib'];
 		$attributes = $this->config['internal']['authData'];
 
-		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to read attributes from '{$libName}'.");
 		$skipped = false;
 		switch ($libName) {
 
+			/*
+			 * SHIBBOLETH
+			 */
 			case 'shibboleth':
 				if ($this->config['debug']['logRawAuthLibAttibuteData']) {
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Shibboleth:\n" . print_r($_SERVER, true));
@@ -146,12 +172,14 @@ class MultiAuthPlugin extends AuthPlugin {
 				}
 				break;
 
-
+			/*
+			 * SIMPLESAMLPHP
+			 */
 			case 'simplesamlphp':
 				$ssphpPath = $this->config['paths']['libs']['simplesamlphp'];
 
 				if (file_exists($ssphpPath . "/www/_include.php")) {
-					// load simpleSAMLphp lib
+					// load simpleSAMLphp library
 					require_once($ssphpPath . "/www/_include.php");
 
 					// Load simpleSAMLphp configuration and session.
@@ -170,8 +198,6 @@ class MultiAuthPlugin extends AuthPlugin {
 						wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No valid session found.");
 					}
 
-					//var_dump($_SESSION);var_dump($ssphpAttrs); exit;
-						
 					foreach ($attributes as $attribute) {
 						if (isset($ssphpAttrs["urn:mace:dir:attribute-def:" . $attribute][0])) {
 							$authData[$attribute] = $ssphpAttrs["urn:mace:dir:attribute-def:" . $attribute][0];
@@ -186,7 +212,9 @@ class MultiAuthPlugin extends AuthPlugin {
 				}
 				break;
 
-
+			/*
+			 * UNKNOWN/INVALID LIBRARY
+			 */
 			default:
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Skipped unknown authentication library '{$libName}'.");
 				$skipped = true;
@@ -202,38 +230,6 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 	}
 
-
-	/**
-	 * Load a $config array from the given file and merge
-	 * it in the MultiAuthPlugin's configuration
-	 * @param string $configFile
-	 * the path to the configuration file to be loaded
-	 * @return boolean Successfull execution
-	 */
-	private function loadConfig($configFile) {
-		if (!file_exists($configFile)) {
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "The specified configuration file '$configFile' does not exist.");
-			return false;
-		}
-
-		// include the configuration file
-		require($configFile);
-
-
-		if (!isset($config) || !is_array($config)) {
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "The specified configuration file '$configFile' does not contain a \$config array.");
-			return false;
-		}
-
-
-		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Loading configuration from file '$configFile'.");
-
-		// TODO there should be checks and debug information
-		// merge the entire config array
-		$this->config = array_merge($this->config, $config);
-
-		return true;
-	}
 
 	/**
 	 * Returns the current version string
@@ -327,6 +323,7 @@ class MultiAuthPlugin extends AuthPlugin {
 			return true;
 		}
 		else {
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Invalid method '{$methodName}'.");
 			return false;
 		}
 	}
@@ -398,6 +395,12 @@ class MultiAuthPlugin extends AuthPlugin {
 			return false;
 		}
 
+		if ($methodName == 'local') {
+			// local login requested -- nothing to do for MultiAuth
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method '{$methodName}'. Skipping MultiAuth login process." );
+			return false;
+		}
+
 		if (!empty($method)) {
 			// got a valid method -> go on with the login process
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to log in a user with chosen method '{$methodName}'." );
@@ -417,7 +420,7 @@ class MultiAuthPlugin extends AuthPlugin {
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Unmatched requirements. Cannot login.");
 				return false;
 			}
-				
+
 
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Attempting user login for '{$username}'.");
 
@@ -443,7 +446,6 @@ class MultiAuthPlugin extends AuthPlugin {
 					// save the authentication method via the userSetCookiesHook
 					$user->setCookies();
 
-					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Successfully logged in with method '{$methodName}'.");
 					return true;
 				}
 				else {
@@ -595,8 +597,7 @@ class MultiAuthPlugin extends AuthPlugin {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Logged in user '{$user->getName()}' from session.");
 
 			// try to recover the used login method
-			// TODO what if that fails?
-			if (isset($_SESSION['MA_methodName']) && $_SESSION['MA_methodName'] != '') {
+			if (isset($_SESSION['MA_methodName']) && $_SESSION['MA_methodName'] != '') {  // TODO session
 				$this->currentMethodName = $_SESSION['MA_methodName'];
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method '" . $this->currentMethodName . "' from session.");
 			}
@@ -609,12 +610,10 @@ class MultiAuthPlugin extends AuthPlugin {
 				return false;
 			}
 
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Successfully logged in from session.");
 			return true;
 		}
 		else {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No session found.");
-
 			return false;
 		}
 	}
@@ -634,7 +633,6 @@ class MultiAuthPlugin extends AuthPlugin {
 		// log the user out
 		$wgUser->logout();
 		$wgUser->setId(0);
-
 
 		// Make sure we deliver the correct result of the
 		// logout status
@@ -678,39 +676,29 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * The value of the returnto= parameter or an empty string if not defined
 	 */
 	private function extractReturnToParam(&$personal_urls) {
-		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to extract return url from original login link.");
-
 		//check for link definitions parameter
 		if (isset($personal_urls['anonlogin']) && is_array($personal_urls['anonlogin'])) {
 			$t_href = $personal_urls['anonlogin']['href'];
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Found 'anonlogin' link (" . $t_href . ").");
 		}
 		else if (isset($personal_urls['login']) && is_array($personal_urls['login'])) {
 			$t_href = $personal_urls['login']['href'];
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Found 'login' link (" . $t_href . ").");
 		}
 		else if (isset($personal_urls['logout']) && is_array($personal_urls['logout'])) {
 			$t_href = $personal_urls['logout']['href'];
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Found 'logout' link (" . $t_href . ").");
 		}
 		else {
 			// no link found
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No login/logout link defined. Doing nothing.");
 			return '';
 		}
-
 
 		// try to extract the value of the returnto parameter
 		$t_pos = strpos($t_href, 'returnto');
 		if ( is_int($t_pos) ) {
 			$t_pos += strlen('returnto=');
 			$returnto = substr($t_href, $t_pos);
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Found 'returnto=' parameter (returnto=" . $returnto . ").");
-
 			return $returnto;
 		}
 		else {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No 'returnto=' parameter found.");
 			return '';
 		}
 	}
@@ -730,11 +718,9 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * Success status
 	 */
 	function filterSpecialPageAliasesHook( &$specialPageAliases, $langCode ) {
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK START");
-
 		global $wgTitle;
-		if (!is_null($wgTitle) && (!$wgTitle->userCanRead() || !$wgTitle->userCanEdit())) {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Non-readable page detected.");
+		//if (!is_null($wgTitle) && (!$wgTitle->userCanRead() || !$wgTitle->userCanEdit())) {
+		if (!is_null($wgTitle) && !$wgTitle->userCanRead()) {
 
 			if (isset($specialPageAliases['Userlogin']) && isset($specialPageAliases['MultiAuthSpecialLogin'])) {
 				$specialPageAliases['Userlogin'] = $specialPageAliases['MultiAuthSpecialLogin'];
@@ -745,17 +731,15 @@ class MultiAuthPlugin extends AuthPlugin {
 			}
 		}
 
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK END");
 		return true;
 	}
 
 
-	function getLocalURLHook( $title, $url, $query ) { 
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "{$title}");
+	function getLocalURLHook( $title, $url, $query ) {
 		return true;
 	}
-	
-	
+
+
 
 	/**
 	 * If correctly installed this hook adds available login links to the
@@ -769,11 +753,8 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * Success status
 	 */
 	function addLinkHook(&$personal_urls, &$title) {
-		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK START");
-
 		// get the returnto page
 		if (!isset($_REQUEST['returnto'])) {
-			// extract a potentially available returnto= parameter from the login link
 			$returnto = $this->extractReturnToParam($personal_urls);
 		}
 		else {
@@ -781,42 +762,27 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 
 		// kill the standard login/logout links
-		if ($this->config['internal']['hideMwLoginLink']) {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Killing standard login link (hideMwLoginLink = true).");
-			unset($personal_urls['anonlogin']);
-			unset($personal_urls['login']);
-		}
-
-		if ($this->config['internal']['hideMwLogoutLink']) {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Killing standard logout link (hideMwLogoutLink = true).");
-			unset($personal_urls['logout']);
-		}
-
-		$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL();
-		$logoutLink = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeFullURL();
+		unset($personal_urls['anonlogin']);
+		unset($personal_urls['login']);
+		unset($personal_urls['logout']);
 
 		// Build link to the login/logout special pages of the MultiAuthPlugin
+		$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL();
+		$logoutLink = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeFullURL();
+		
 		if (!$this->isLoggedIn()) {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Adding MultiAuth login link.");
-
-			global $wgScriptExtension;
 			$personal_urls['MA_login'] = array(
 				'text' => wfMsg('special_login_link'),
 				'href' => $loginLink,
 			);
 		}
 		else {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Adding MultiAuth logout link.");
-
 			$method = $this->getCurrentMethod();
 			$personal_urls['MA_logout'] = array(
-			//'text' => wfMsg('special_logout_link') . ' (' . $this->getCurrentMethodName() . ')',
 				'text' => $method['logout']['text'],
 				'href' => $logoutLink,
 			);
 		}
-
-		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK END");
 
 		return true;
 	}
@@ -841,17 +807,12 @@ class MultiAuthPlugin extends AuthPlugin {
 		 *  - first try what would have been done anyway (login via session)
 		 *  - if that fails move on to our plugin code
 		 */
-		
+
 		// check if this hook was already called
 		if ($this->inUserLoadFromSessionHook) {
-			// do nothing
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Instance of this hook already running. Stopping to prevent recursion.");
 			return true;
 		}
 		$this->enterUserLoadFromSessionHook();
-
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK START");
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Starting user authentication.");
 
 		// try to log the user in
 		// first from session then with one of the configured methods
@@ -862,8 +823,6 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 
 		$this->leaveUserLoadFromSessionHook();
-
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK END");
 
 		return true;
 	}
@@ -910,8 +869,7 @@ class MultiAuthPlugin extends AuthPlugin {
 	 */
 	function userLogoutHook(&$user) {
 		if (isset($_SESSION['MA_methodName'])) {
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Clearing 'MA_methodName = " . $_SESSION['MA_methodName'] . "' from session.");
-			unset($_SESSION['MA_methodName']);
+			unset($_SESSION['MA_methodName']); // TODO session
 		}
 		else {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "'MA_methodName' already cleared from session.");
@@ -938,12 +896,6 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * @return boolean
 	 */
 	function authenticate( $username, $password) {
-		if ($this->config['internal']['allowPreviousAuthPlugin']) {
-			if (!is_null($this->old_wgAuth)) {
-				return $this->old_wgAuth->authenticate($username, $password);
-			}
-		}
-
 		return false;
 	}
 
@@ -1027,8 +979,6 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * @param $autocreate bool True if user is being autocreated on login
 	 */
 	function initUser( &$user, $autocreate = false ) {
-		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Initializing user properties for '{$user->getName()}'.");
-
 		$user->mPassword = "nologin";
 		/*
 		 * Due to MW limitations this defaults to the current time

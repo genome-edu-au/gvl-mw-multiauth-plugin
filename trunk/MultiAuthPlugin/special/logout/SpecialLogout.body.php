@@ -86,9 +86,7 @@ class MultiAuthSpecialLogout extends SpecialPage {
 			// get information about the currently active authentication method
 			$currentMethodName = $this->multiAuthPlugin->getCurrentMethodName();
 
-			// FIXME need a fallback if currentMethod is empty - might happen if config is changed live
-			
-			if ($currentMethodName != 'local') {
+			if (!empty($currentMethodName) && $currentMethodName != 'local') {
 				$this->doExternalLogout($html);
 			}
 			else {
@@ -150,16 +148,7 @@ class MultiAuthSpecialLogout extends SpecialPage {
 
 		if ($this->multiAuthPlugin->config['internal']['authMode'] == 'lazy') {
 			// we can come back to MW
-			if ($this->multiAuthPlugin->config['internal']['replaceMwLocalLogoutPage']) {
-				$local_href = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeLocalURL();
-			}
-			else {
-				$localMethod = $this->multiAuthPlugin->getMethod('local');
-				$local = $localMethod['logout'];
-				$local_text = $local['text'];
-
-				$local_href = $local['href'];
-			}
+			$local_href = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeLocalURL();
 		}
 		else {
 			// we won't be able to come back to MW because of access restrictions

@@ -75,8 +75,8 @@ $config['internal'] = array(
 	 * NOTE: Currently supported libraries are 'shibboleth' (needs running 
 	 * shibd) and 'simplesamlphp' (needs simplesamlphp installed).
 	 */
-	//'authLib' => 'shibboleth',
-	'authLib' => 'simplesamlphp',
+	'authLib' => 'shibboleth',
+	//'authLib' => 'simplesamlphp',
 
 	/*
 	 * In this step authentication data from is acquired and made available in 
@@ -107,6 +107,41 @@ $config['internal'] = array(
 	'authMode' => 'lazy',
 	'strictLogoutTarget' => 'https://www.sso.uni-erlangen.de/logout.html',
 
+	/*
+	 * Does a redirect to the specified URL after the logout process is
+	 * completed. If the URL is left empty the MultiAuth logout page will be
+	 * displayed.
+	 * IMPORTANT: This can be used to archive the same effect as with the 'strictLogoutTarget'
+	 * option although using lazy authentication
+	 * DEFAULT: 'redirectAfterLogoutComplete' => '',
+	 */
+	'redirectAfterLogoutComplete' => '',
+
+
+	/*
+	 * Automatically create local accounts for successfully authenticated
+	 * users.
+	 * If enabled above notification emails will be sent.
+	 * DEFAULT: 'enableAutoCreateUsers' => true,
+	 */
+	'enableAutoCreateUsers' => true,
+
+
+	/*
+	 * This allows you to configure if and/or who may and may not
+	 * authenticate himself to the local database via MW's original
+	 * login mechanism.
+	 * This does not disable the 'local' option but controls whether a login
+	 * attempt via 'local' will be processed or immediately denied.
+	 * Use _ONE_ of the following lines to configure authentication
+	 * against the local database.
+	 * DEFAULT: 'enableLocalAuth' => true 
+	 */
+	'enableLocalAuth' => true,
+	//'enableLocalAuth' => array( 'Admin' ),
+	//'disableLocalAuth' => true,
+	//'disableLocalAuth' => array( 'UserXY' ),
+
 
 	/*
 	 * This file sets up the authentication choices available via the login
@@ -130,93 +165,20 @@ $config['internal'] = array(
 	 */
 	'methods' => array(
 		'local',
-		'shib_sso-dev',
+		'shibboleth-default',
 
 		/*
 		 * SAMPLES
+		 * This should be commented out in production!
 		 */
-		'shibboleth-rrze',
-		'shibboleth-rrze-restricted',
-		//'shibboleth-openid',
-		'simplesamlphp-rrze',
-		//'simplesamlphp-openid',
+		'sample-shibboleth-default',
+		'sample-shibboleth-restricted',
+		'sample-shibboleth-someApp',
+		'sample-simplesamlphp-default',
+		'sample-simplesamlphp-openid',
 	),
 
-	
-	/*
-	 * This allows you to configure if and/or who may and may not
-	 * authenticate himself to the local database via MW's original
-	 * login mechanism.
-	 * This does not disable the 'local' option but controls whether a login
-	 * attempt via 'local' will be processed or immediately denied.
-	 * Use _ONE_ of the following lines to configure authentication
-	 * against the local database.
-	 * DEFAULT: 'enableLocalAuth' => true 
-	 */
-	'enableLocalAuth' => true,
-	//'enableLocalAuth' => array( 'Admin' ),
-	//'disableLocalAuth' => true,
-	//'disableLocalAuth' => array( 'UserXY' ),
-	
-	
-	/*
-	 * Automatically create local accounts for successfully authenticated
-	 * users.
-	 * If enabled above notification emails will be sent.
-	 * DEFAULT: 'enableAutoCreateUsers' => true,
-	 */
-	'enableAutoCreateUsers' => true,
-
-	
-
-	
-/* ********************************************
-   *              DEV-FEATURES                *
-   *           SHOULD NOT BE CHANGED          *
-   ******************************************** */
-	
-	/* 
-	 * Hide Mediawiki's standard login/logout links
-	 * This hides the original login/logout links to put the MultiAuthPlugin
-	 * completely in control of the link generation
-	 * DEFAULT: 'hideMwLoginLink' => true,
-	 *          'hideMwLogoutLink' => true,
-	 */
-	'hideMwLoginLink' => true,
-	'hideMwLogoutLink' => true,
-
-	/*
-	 * This allows you to configure how to do a local logout after doing an 
-	 * external logout at the IdP. 
-	 * You may use MA's internal logout implementation including the 
-	 * logout-success page or stick to the original MW logout.
-	 * Using the MW's logout page is more compatible, MA's logout page more 
-	 * flexible.
-	 * DEFAULT: 'replaceMwLocalLogoutPage' => true,
-	 */
-	'replaceMwLocalLogoutPage' => true,
-
-	/*
-	 * Does a redirect to the specified URL after the logout process is
-	 * completed. If the URL is left empty the MultiAuth logout page will be
-	 * displayed.
-	 * IMPORTANT: This will only work if 'replaceMwLocalLogoutPage' is 'true'.
-	 * DEFAULT: 'redirectAfterLogoutComplete' => '',
-	 */
-	'redirectAfterLogoutComplete' => '',
-
-	
-	// TODO build also an internal login mechanism with an MA login success page and add a configuration option 
-	//'replaceMwLocalLoginPage' => true,
-	
-	
-	/*
-	 * Allow fallback to previously installed wgAuth plugin
-	 * (DEV-FEATURE - DON'T CHANGE THIS UNLESS YOU KNOW WHAT YOU'RE DOING)
-	 * DEFAULT: 'allowPreviousAuthPlugin' => false,
-	 */ 
-	'allowPreviousAuthPlugin' => false,
-
+		
 );
 
 
@@ -277,7 +239,7 @@ $config['debug'] = array(
 
 
 	/*
-	 * Log a dump of the attribute data is it comes directly
+	 * Log a dump of the attribute data as it comes directly
 	 * from the authentication lib.
 	 * DEFAULT: 'logRawAuthLibAttibuteData' => false, 
 	 */
