@@ -39,7 +39,7 @@ require_once("$IP/includes/AuthPlugin.php");
  * <i>This plugin was developed and tested with MW 1.13.4 and MW 1.15.1</i>
  *
  * @author Florian Löffler (RRZE, unrza249)
- * @version 1.1.2
+ * @version 1.3.0
  */
 
 class MultiAuthPlugin extends AuthPlugin {
@@ -355,7 +355,6 @@ class MultiAuthPlugin extends AuthPlugin {
 			return true;
 		}
 		else {
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Invalid method '{$methodName}'.");
 			return false;
 		}
 	}
@@ -441,9 +440,11 @@ class MultiAuthPlugin extends AuthPlugin {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Attempting user login for '{$username}'.");
 
 			// Check if we need to auto-create this user
+			$autoCreated = false;
 			if ($this->config['internal']['enableAutoCreateUsers'] && !User::idFromName($username)) {
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Could not find user '{$username}' in the local database. Trying to automatically create it.");
 				$this->createUser($user, $attrs);
+				$autoCreated = true;
 			}
 
 
@@ -456,7 +457,10 @@ class MultiAuthPlugin extends AuthPlugin {
 
 				if ($user->isLoggedIn()) {
 					$user->setCookies();
-					$this->modifyUserIfNeeded($user, $attrs);
+					
+					if ($autoCreated || $this->config['internal']['enableAutoUpdateUsers']) {
+						$this->modifyUserIfNeeded($user, $attrs);
+					}
 
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Logged in user '$username' via SSO.");
 					return true;
