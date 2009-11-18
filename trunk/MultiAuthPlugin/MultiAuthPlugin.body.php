@@ -24,6 +24,7 @@
 // TODO create a Config class to hold all configuration options
 // TODO create a Method class
 // TODO try to use UserMailer::send( $to, $sender, $subject, $body, $replyto ); for mail sending
+// TODO add SingleLogout support
 // FIXME no method (null) and 'local' method have a unique status, that is checked via multiple if-else constructs
 // FIXME storing/retrieving of session data is very low level -> write some abstractions for that and use MW's session hook when possible
 
