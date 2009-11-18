@@ -23,6 +23,7 @@
 
 // TODO create a Config class to hold all configuration options
 // TODO create a Method class
+// TODO try to use UserMailer::send( $to, $sender, $subject, $body, $replyto ); for mail sending
 // FIXME no method (null) and 'local' method have a unique status, that is checked via multiple if-else constructs
 // FIXME storing/retrieving of session data is very low level -> write some abstractions for that and use MW's session hook when possible
 
@@ -136,6 +137,14 @@ class MultiAuthPlugin extends AuthPlugin {
 		return true;
 	}
 
+	/**
+	 * Tries to load the currentMethodName from the MA_methodName session variable.
+	 * When already at it we also perform some checks and recover from unexpected
+	 * configuration changes concerning the validity of a loaded method.
+	 *
+	 * @return String
+	 * The loaded method name or null if none could be loaded
+	 */
 	private function loadCurrentMethodNameFromSession() {
 		if (isset($_SESSION['MA_methodName'])) {
 			$methodName = $_SESSION['MA_methodName'];
@@ -145,7 +154,7 @@ class MultiAuthPlugin extends AuthPlugin {
 			}
 			else {
 				// The method name stored in the session may become invalid when the configuration
-				// is changed live. To recover from that, we reset the method name and do a local logout. 
+				// is changed live. To recover from that, we reset the method name and do a local logout.
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got invalid method name '{$methodName}'. Trying to recover via method reset and local logout." );
 				unset($_SESSION['MA_methodName']);
 				$this->currentMethodName = null;
@@ -157,6 +166,8 @@ class MultiAuthPlugin extends AuthPlugin {
 			$this->currentMethodName = null;
 			return false;
 		}
+
+		return $this->currentMethodName;
 	}
 
 
@@ -442,6 +453,9 @@ class MultiAuthPlugin extends AuthPlugin {
 					// save the authentication method via the userSetCookiesHook
 					$user->setCookies();
 
+					// update the user's data if needed
+					$this->modifyUserIfNeeded($user, $attrs);
+
 					return true;
 				}
 				else {
@@ -526,15 +540,15 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		// setup the user object
 		$user->loadDefaults($attrs['username']);
-
-		if (isset($attrs['email'])) {
+		/*
+		 if (isset($attrs['email'])) {
 			$user->setEmail($attrs['email']);
 			$user->confirmEmail();
-		}
-		if (isset($attrs['fullname'])) {
+			}
+			if (isset($attrs['fullname'])) {
 			$user->setRealName($attrs['fullname']);
-		}
-
+			}
+			*/
 		$this->initUser($user, true);
 
 		// create database entry
@@ -543,6 +557,9 @@ class MultiAuthPlugin extends AuthPlugin {
 		// see if it worked ...
 		if ($user->mId > 0) {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Added database entry for user '{$attrs['username']}' with ID " . $user->mId . ".");
+
+			// set all attributes other than the Uid/Username
+			$this->modifyUserIfNeeded($user, $attrs);
 
 			if ($this->config['comm']['onUserCreation']['notifyMail']) {
 
@@ -583,6 +600,56 @@ class MultiAuthPlugin extends AuthPlugin {
 				}
 			}
 			return false;
+		}
+	}
+
+
+	/**
+	 * Updates the user's details according to what was given from the SSO
+	 * library.
+	 * Note that this will be called every time after authenticating
+	 * to the IdP.
+	 * 
+	 * @param User $user
+	 * User object from MW
+	 * @param Array $attrs
+	 * Attribute array
+	 */
+	private function modifyUserIfNeeded(&$user, $attrs) {
+		$username = $user->getName();
+		$dirty = false;
+
+		/*
+		 * Email
+		 */
+		if (isset($attrs['email'])) {
+			$new = $attrs['email'];
+			$old = $user->getEmail();
+
+			if ($new != $old) {
+				$user->setEmail($new);
+				$user->confirmEmail();
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Updated email for user '{$username}' from '{$old}' to '{$new}'");
+				$dirty = true;
+			}
+		}
+
+		/*
+		 * Fullname
+		 */
+		if (isset($attrs['fullname'])) {
+			$new = $attrs['fullname'];
+			$old = $user->getRealName();
+
+			if ($new != $old) {
+				$user->setRealName($new);
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Updated realName for user '{$username}' from '{$old}' to '{$new}'");
+				$dirty = true;
+			}
+		}
+
+		if ($dirty) {
+			$user->saveSettings();
 		}
 	}
 
