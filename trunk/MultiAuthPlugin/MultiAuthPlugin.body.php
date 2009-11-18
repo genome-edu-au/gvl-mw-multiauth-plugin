@@ -101,12 +101,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		$this->config = array();
 		$this->loadConfig();
 		$this->loadCurrentMethodNameFromSession();
-
-		if ($this->getCurrentMethodName() != 'local' && $this->getCurrentMethodName() != null) {
-			$this->retrieveAuthData();
-		}
-
-		$this->loadConfig($this->config['internal']['methodSetupFile']);
+		$this->updateConfiguredMethods();
 	}
 
 	/**
@@ -168,6 +163,12 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 
 		return $this->currentMethodName;
+	}
+
+
+	private function updateConfiguredMethods() {
+		unset($this->config['methods']);
+		$this->loadConfig($this->config['internal']['methodSetupFile']);
 	}
 
 
@@ -407,11 +408,19 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * Success status of the login attempt
 	 */
 	function login(&$user) {
-		$method = $this->getCurrentMethod();
+		$methodName = $this->getCurrentMethodName();
 
-		if (!empty($method)) {
+		// start the logging in...
+		if (!empty($methodName)) {
 			// got a valid method -> go on with the login process
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to log in a user with method '{$this->getCurrentMethodName()}'." );
+
+			// Get authentication data retrieved from the IdP using the configured SSO library
+			if ($methodName != 'local' && $methodName != null) {
+				$this->retrieveAuthData();
+			}
+			$this->updateConfiguredMethods();
+			$method = $this->getCurrentMethod();
 
 			$attrs = $method['attributes'];
 
@@ -428,7 +437,6 @@ class MultiAuthPlugin extends AuthPlugin {
 				return false;
 			}
 
-
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Attempting user login for '{$username}'.");
 
 			// Check if we need to auto-create this user
@@ -440,35 +448,29 @@ class MultiAuthPlugin extends AuthPlugin {
 
 			// check if a user with the given attributes exists
 			if(User::idFromName($username)) {
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Found user '{$username}' in the local database.");
-
 				// log the user in
 				$user = User::newFromName($username);
 				$user->load();
 				$user->setupSession();
 
 				if ($user->isLoggedIn()) {
-
-					// set the cookies now and not sooner because we want to
-					// save the authentication method via the userSetCookiesHook
 					$user->setCookies();
-
-					// update the user's data if needed
 					$this->modifyUserIfNeeded($user, $attrs);
 
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Logged in user '$username' via SSO.");
 					return true;
 				}
 				else {
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to login user '$username'.");
-
 					return false;
 				}
 			}
 
 		}
-
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in a user with chosen method '{$this->getCurrentMethodName()}'." );
-		return false;
+		else {
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in a user with chosen method '{$this->getCurrentMethodName()}'." );
+			return false;
+		}
 	}
 
 	/**
@@ -540,15 +542,6 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		// setup the user object
 		$user->loadDefaults($attrs['username']);
-		/*
-		 if (isset($attrs['email'])) {
-			$user->setEmail($attrs['email']);
-			$user->confirmEmail();
-			}
-			if (isset($attrs['fullname'])) {
-			$user->setRealName($attrs['fullname']);
-			}
-			*/
 		$this->initUser($user, true);
 
 		// create database entry
@@ -596,7 +589,7 @@ class MultiAuthPlugin extends AuthPlugin {
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Notification mail accepted for delivery.");
 				}
 				else {
-					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Notification mail rejected for delivery.");
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Notification mail rejected.");
 				}
 			}
 			return false;
@@ -609,7 +602,7 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * library.
 	 * Note that this will be called every time after authenticating
 	 * to the IdP.
-	 * 
+	 *
 	 * @param User $user
 	 * User object from MW
 	 * @param Array $attrs

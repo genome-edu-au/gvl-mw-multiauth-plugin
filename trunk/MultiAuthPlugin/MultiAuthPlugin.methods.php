@@ -65,7 +65,12 @@ $config['methods'] = array(
 			'fullname'	=> $authData['cn'],
 			'email'		=> $authData['mail'],
 		),
-		
+
+		'requirements' => array(
+			//'username' => '*',  	// this is always implied (hardcoded!)
+			'email' => '*', 		// email is mandatory, but any value will be accepted 
+		),
+				
 	),
 	
 	
