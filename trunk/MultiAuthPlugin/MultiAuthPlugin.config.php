@@ -22,7 +22,6 @@
  */
 
 
-
 // Check to make sure we're actually in MediaWiki.
 if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a valid entry point.');
 
@@ -175,7 +174,7 @@ $config['internal'] = array(
 		'sample-shibboleth-restricted',
 		'sample-shibboleth-someApp',
 		'sample-simplesamlphp-default',
-		'sample-simplesamlphp-openid',
+		'sample-simplesamlphp-someIdP',
 	),
 
 		

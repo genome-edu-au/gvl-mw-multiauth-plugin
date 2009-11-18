@@ -56,7 +56,7 @@ $messages['en'] = array(
 	'credits_description' => 'Login special page as part of the Multi Authentication Plugin',
 
 	'msg_loginSuccess' => 'Successfully logged in!',
-	'msg_notAuthorized' => 'Successful external authentication.<br/>Unfortunately you do not have the necessary access rights to this wiki.'
+	'msg_notAuthorized' => 'Successful external authentication.<br/>Unfortunately you do not have the necessary rights to access this wiki.'
 );
 
 

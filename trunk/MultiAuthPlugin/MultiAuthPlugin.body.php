@@ -21,7 +21,7 @@
  * USA, or see the FSF site: http://www.fsf.org.
  */
 
-// TODO create a Config class to hold all configuration information
+// TODO create a Config class to hold all configuration options
 // TODO create a Method class
 
 // Check to make sure we're actually in MediaWiki.
@@ -114,7 +114,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		$this->loadConfig($this->config['internal']['methodSetupFile']);
 	}
 
-	
+
 	/**
 	 * Load a $config array from the given file and merge
 	 * it in the MultiAuthPlugin's configuration
@@ -139,7 +139,7 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		return true;
 	}
-	
+
 	/**
 	 * Tries to retrieve the configured auth data (see internal->authData) from
 	 * its' methods and make it availabe in the global context for later usage
@@ -172,9 +172,9 @@ class MultiAuthPlugin extends AuthPlugin {
 				}
 				break;
 
-			/*
-			 * SIMPLESAMLPHP
-			 */
+				/*
+				 * SIMPLESAMLPHP
+				 */
 			case 'simplesamlphp':
 				$ssphpPath = $this->config['paths']['libs']['simplesamlphp'];
 
@@ -212,9 +212,9 @@ class MultiAuthPlugin extends AuthPlugin {
 				}
 				break;
 
-			/*
-			 * UNKNOWN/INVALID LIBRARY
-			 */
+				/*
+				 * UNKNOWN/INVALID LIBRARY
+				 */
 			default:
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Skipped unknown authentication library '{$libName}'.");
 				$skipped = true;
@@ -403,10 +403,9 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		if (!empty($method)) {
 			// got a valid method -> go on with the login process
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to log in a user with chosen method '{$methodName}'." );
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to log in a user with method '{$methodName}'." );
 
 			$attrs = $method['attributes'];
-			//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . print_r($attrs,true));
 
 			// Hardcoded requirement: We really need the username!!
 			$username = isset($attrs['username'])?$attrs['username']:'';
@@ -461,9 +460,16 @@ class MultiAuthPlugin extends AuthPlugin {
 		return false;
 	}
 
-
+	/**
+	 * Checks access requirements defined via the method's
+	 * 'requirements' array.
+	 * 
+	 * @param Array $method
+	 * An array holding the method configuration
+	 * @return boolean
+	 * True if all requirements are matched, false otherwise
+	 */
 	private function checkRequirements($method) {
-
 		if (isset($method['requirements'])) {
 			$reqs = $method['requirements'];
 		}
@@ -473,21 +479,28 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 
 		// check requirements
+		$requirementMismatch = false;
 		foreach ($reqs as $attrName => $req) {
 			if (!isset($method['attributes'][$attrName]) || $method['attributes'][$attrName] == '') {
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Missing a required attribute '{$attrName}'" );
+				// required attribute is missing entirely
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Missing required attribute '{$attrName}'" );
+				$requirementMismatch = true;
 			}
 			else {
-				$data = $method['attributes'][$attrName];
+				// required attribute is present -- check if the value is ok, too
+				$value = $method['attributes'][$attrName];
 				if ($req != '*') {
-					if ($req != $data) {
-						wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Mismatched attribute value for '{$attrName}': '{$data}' != '{$req}'" );
-						return false;
+					if ($req != $value) {
+						wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Mismatched attribute value for '{$attrName}': '{$value}' != '{$req}'" );
+						$requirementMismatch = true;
 					}
 				}
 			}
 		}
-
+		if ($requirementMismatch) {
+			return false;
+		}
+		
 		return true;
 	}
 
@@ -598,13 +611,13 @@ class MultiAuthPlugin extends AuthPlugin {
 
 			// try to recover the used login method
 			if (isset($_SESSION['MA_methodName']) && $_SESSION['MA_methodName'] != '') {  // TODO session
-				$this->currentMethodName = $_SESSION['MA_methodName'];
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method '" . $this->currentMethodName . "' from session.");
+			$this->currentMethodName = $_SESSION['MA_methodName'];
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method '" . $this->currentMethodName . "' from session.");
 			}
 			else {
 				$this->currentMethodName = null;
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' .
-						"No 'MA_methodName' found. This can happen if the plugin was enabled after a login was already performed and the old session is still active.");
+						"No 'MA_methodName' found in session. This can happen if the plugin was enabled after a login was already performed and the old session is still active.");
 				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to recover by doing a local logout.");
 				$this->logout();
 				return false;
@@ -769,7 +782,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		// Build link to the login/logout special pages of the MultiAuthPlugin
 		$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL();
 		$logoutLink = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeFullURL();
-		
+
 		if (!$this->isLoggedIn()) {
 			$personal_urls['MA_login'] = array(
 				'text' => wfMsg('special_login_link'),
