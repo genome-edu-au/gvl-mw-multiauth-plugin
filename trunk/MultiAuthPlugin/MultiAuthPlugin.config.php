@@ -79,7 +79,8 @@ $config['internal'] = array(
 
 	/*
 	 * In this step authentication data from is acquired and made available in 
-	 * the global namespace, so that the methodSetupFile can access it.
+	 * the global namespace as an associative array called "authData", so that 
+	 * the methodSetupFile can access it.
 	 * The data will be read using the authLib specified above.
 	 * 
 	 * IMPORTANT: All attributes that could not be retrieved are set with an 
@@ -250,7 +251,7 @@ $config['debug'] = array(
 	 * In short: A dump of the $authData array.
 	 * DEFAULT: 'logRetrievedAttributeData' => false,
 	 */
-	'logRetrievedAttributeData' => false,
+	'logRetrievedAttributeData' => true,
 
 );
 

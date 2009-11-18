@@ -23,6 +23,8 @@
 
 // TODO create a Config class to hold all configuration options
 // TODO create a Method class
+// FIXME no method (null) and 'local' method have a unique status, that is checked via multiple if-else constructs
+// FIXME storing/retrieving of session data is very low level -> write some abstractions for that and use MW's session hook when possible
 
 // Check to make sure we're actually in MediaWiki.
 if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a valid entry point.');
@@ -90,30 +92,21 @@ class MultiAuthPlugin extends AuthPlugin {
 		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "\n=================================================================================================="); /// seperator
 		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "*** I'm alive!");
 
-		// start the whole thing up...
-		$this->config = array();
-		$this->init($configFile);
-	}
-
-	/**
-	 * Initialises the MultiAuthPlugin
-	 * @param string $configFile
-	 * The path to the configuration file to be loaded
-	 */
-	private function init($configFile = null) {
-		if (is_null($configFile)) {
-			$configFile = dirname(__FILE__) . '/MultiAuthPlugin.config.php';
-		}
-		$this->loadConfig($configFile);
 		if ($this->config['debug']['logServerVariables']) {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "*** SERVER: " . print_r($_SERVER, true));
 		}
-		$this->retrieveAuthData();
 
-		// setup the authentication methods
+		// start the whole thing up...
+		$this->config = array();
+		$this->loadConfig();
+		$this->loadCurrentMethodNameFromSession();
+
+		if ($this->getCurrentMethodName() != 'local' && $this->getCurrentMethodName() != null) {
+			$this->retrieveAuthData();
+		}
+
 		$this->loadConfig($this->config['internal']['methodSetupFile']);
 	}
-
 
 	/**
 	 * Load a $config array from the given file and merge
@@ -122,7 +115,10 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * the path to the configuration file to be loaded
 	 * @return boolean Successfull execution
 	 */
-	private function loadConfig($configFile) {
+	private function loadConfig($configFile = null) {
+		if (is_null($configFile)) {
+			$configFile = dirname(__FILE__) . '/MultiAuthPlugin.config.php';
+		}
 		if (!file_exists($configFile)) {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "The specified configuration file '$configFile' does not exist.");
 			return false;
@@ -139,6 +135,30 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		return true;
 	}
+
+	private function loadCurrentMethodNameFromSession() {
+		if (isset($_SESSION['MA_methodName'])) {
+			$methodName = $_SESSION['MA_methodName'];
+			if ($this->isValidMethod($methodName)) {
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method name '{$methodName}'" );
+				$this->currentMethodName = $methodName;
+			}
+			else {
+				// The method name stored in the session may become invalid when the configuration
+				// is changed live. To recover from that, we reset the method name and do a local logout. 
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got invalid method name '{$methodName}'. Trying to recover via method reset and local logout." );
+				unset($_SESSION['MA_methodName']);
+				$this->currentMethodName = null;
+				$this->logout();
+			}
+		}
+		else {
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No method chosen, yet." );
+			$this->currentMethodName = null;
+			return false;
+		}
+	}
+
 
 	/**
 	 * Tries to retrieve the configured auth data (see internal->authData) from
@@ -230,7 +250,6 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 	}
 
-
 	/**
 	 * Returns the current version string
 	 * @return string
@@ -319,7 +338,7 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * true if the requested method is valid, false otherwise
 	 */
 	function isValidMethod($methodName) {
-		if (isset($this->config['methods'][$methodName])) {
+		if (in_array($methodName, $this->config['internal']['methods'])) {
 			return true;
 		}
 		else {
@@ -377,33 +396,11 @@ class MultiAuthPlugin extends AuthPlugin {
 	 * Success status of the login attempt
 	 */
 	function login(&$user) {
-		if (isset($_SESSION['MA_methodName'])) {
-			if ($this->isValidMethod($_SESSION['MA_methodName'])) {
-				// Retrieve the user's chosen login method from the session
-				$methodName = $this->currentMethodName = $_SESSION['MA_methodName'];
-				$method = $this->getMethod($methodName);
-			}
-			else {
-				// got an invalid method name -> strange, but possible
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got invalid method name '{$_SESSION['MA_methodName']}'. Aborting." );
-				return false;
-			}
-		}
-		else {
-			// no method name stored
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No method chosen." );
-			return false;
-		}
-
-		if ($methodName == 'local') {
-			// local login requested -- nothing to do for MultiAuth
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method '{$methodName}'. Skipping MultiAuth login process." );
-			return false;
-		}
+		$method = $this->getCurrentMethod();
 
 		if (!empty($method)) {
 			// got a valid method -> go on with the login process
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to log in a user with method '{$methodName}'." );
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to log in a user with method '{$this->getCurrentMethodName()}'." );
 
 			$attrs = $method['attributes'];
 
@@ -456,14 +453,14 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		}
 
-		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in a user with chosen method '{$methodName}'." );
+		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in a user with chosen method '{$this->getCurrentMethodName()}'." );
 		return false;
 	}
 
 	/**
 	 * Checks access requirements defined via the method's
 	 * 'requirements' array.
-	 * 
+	 *
 	 * @param Array $method
 	 * An array holding the method configuration
 	 * @return boolean
@@ -500,7 +497,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		if ($requirementMismatch) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -608,21 +605,6 @@ class MultiAuthPlugin extends AuthPlugin {
 		// check if the user could be logged in from a saved session
 		if ($user->isLoggedIn()) {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Logged in user '{$user->getName()}' from session.");
-
-			// try to recover the used login method
-			if (isset($_SESSION['MA_methodName']) && $_SESSION['MA_methodName'] != '') {  // TODO session
-			$this->currentMethodName = $_SESSION['MA_methodName'];
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Got method '" . $this->currentMethodName . "' from session.");
-			}
-			else {
-				$this->currentMethodName = null;
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' .
-						"No 'MA_methodName' found in session. This can happen if the plugin was enabled after a login was already performed and the old session is still active.");
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Trying to recover by doing a local logout.");
-				$this->logout();
-				return false;
-			}
-
 			return true;
 		}
 		else {
@@ -732,6 +714,8 @@ class MultiAuthPlugin extends AuthPlugin {
 	 */
 	function filterSpecialPageAliasesHook( &$specialPageAliases, $langCode ) {
 		global $wgTitle;
+
+		// TODO userCanEdit must only be checked if the user also _wants_ to edit the page
 		//if (!is_null($wgTitle) && (!$wgTitle->userCanRead() || !$wgTitle->userCanEdit())) {
 		if (!is_null($wgTitle) && !$wgTitle->userCanRead()) {
 
@@ -747,11 +731,11 @@ class MultiAuthPlugin extends AuthPlugin {
 		return true;
 	}
 
-
-	function getLocalURLHook( $title, $url, $query ) {
+	/*
+	 function getLocalURLHook( $title, $url, $query ) {
 		return true;
-	}
-
+		}
+		*/
 
 
 	/**
@@ -827,19 +811,29 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 		$this->enterUserLoadFromSessionHook();
 
+
+
 		// try to log the user in
 		// first from session then with one of the configured methods
-		if (!$this->loginFromSession($user)) {
-			if (!$this->login($user)) {
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in.");
+		$loginSuccessSession = $this->loginFromSession($user);
+		if (!$loginSuccessSession) {
+			if ($this->getCurrentMethodName() == 'local' || $this->getCurrentMethodName() == null) {
+				// local login requested -- nothing to do for MultiAuth
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Nothing more to do for MultiAuth." );
 			}
-		}
+			else {
+				// turn login control over to MultiAuth
+				$loginSuccessMA = $this->login($user);
+				if (!$loginSuccessMA) {
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in.");
+				}
+			}
 
-		$this->leaveUserLoadFromSessionHook();
+			$this->leaveUserLoadFromSessionHook();
+		}
 
 		return true;
 	}
-
 
 
 	/**
@@ -858,15 +852,15 @@ class MultiAuthPlugin extends AuthPlugin {
 		 wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "HOOK START");
 
 		 if (is_string($this->currentMethodName) && $this->currentMethodName != '') {
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Storing 'MA_methodName = $this->currentMethodName' in session.");
-			$session['MA_methodName'] = $this->currentMethodName;
-			}
-			else {
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No 'MA_methodName' found. This can happen if another plugin (e.g. the normal local login page) has been used to authenticate the user. For now we just default to 'MA_methodName = local' in that case.");
-			$this->currentMethodName = 'local';
-			$session['MA_methodName'] = $this->currentMethodName;
-			}
-			*/
+		 wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Storing 'MA_methodName = $this->currentMethodName' in session.");
+		 $session['MA_methodName'] = $this->currentMethodName;
+		 }
+		 else {
+		 wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "No 'MA_methodName' found. This can happen if another plugin (e.g. the normal local login page) has been used to authenticate the user. For now we just default to 'MA_methodName = local' in that case.");
+		 $this->currentMethodName = 'local';
+		 $session['MA_methodName'] = $this->currentMethodName;
+		 }
+		 */
 		return true;
 	}
 
@@ -882,7 +876,7 @@ class MultiAuthPlugin extends AuthPlugin {
 	 */
 	function userLogoutHook(&$user) {
 		if (isset($_SESSION['MA_methodName'])) {
-			unset($_SESSION['MA_methodName']); // TODO session
+			unset($_SESSION['MA_methodName']);
 		}
 		else {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "'MA_methodName' already cleared from session.");

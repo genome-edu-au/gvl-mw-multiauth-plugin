@@ -85,14 +85,14 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		else if (isset($_GET['method']) && $this->multiAuthPlugin->isValidMethod($_GET['method'])) {
 
 			$this->initLogin($_GET['method']);
-			// if successfull, the above function will issue a redirect
+			// the above function will issue a redirect
 
 		}
-		else if (!is_null($this->multiAuthPlugin->getCurrentMethodName())) {
+		else if (!is_null($this->multiAuthPlugin->getCurrentMethodName()) && $this->multiAuthPlugin->getCurrentMethodName() != 'local') {
 				
-			// authentication success but not authorized
+			// external authentication success but not authorized
 			$html .= "<p>" . wfMsg('msg_notAuthorized') . "</p>\n";
-			unset($_SESSION['MA_methodName']); // FIXME session
+			unset($_SESSION['MA_methodName']);
 				
 		}
 		else {
@@ -100,7 +100,8 @@ class MultiAuthSpecialLogin extends SpecialPage {
 			$this->addLoginLinks($html);
 
 		}
-
+		
+				
 		$wgOut->addHTML($html);
 		$wgOut->returnToMain();
 	}
@@ -117,7 +118,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		if  (!empty($method)){
 
 			// save selected method name
-			$_SESSION['MA_methodName'] = $methodName; // FIXME session
+			$_SESSION['MA_methodName'] = $methodName;
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "SESSION['MA_methodName'] = {$methodName}");
 			
 			// init the external login

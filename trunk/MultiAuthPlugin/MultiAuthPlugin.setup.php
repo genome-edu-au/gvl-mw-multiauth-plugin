@@ -139,8 +139,11 @@ function deferredMultiAuthSetup() {
 	$wgHooks['LanguageGetSpecialPageAliases'][] = array(&$wgMultiAuthPlugin, 'filterSpecialPageAliasesHook');
 
 	
-	
-	$wgHooks['GetLocalURL'][] = array(&$wgMultiAuthPlugin, 'getLocalURLHook');
+	/*
+	 * Hook to modify URLs returned by calls to the getLocalURL method.
+	 * INFO: This is here for testing purposes.
+	 */
+	//$wgHooks['GetLocalURL'][] = array(&$wgMultiAuthPlugin, 'getLocalURLHook');
 	
 	
 	/********************************************
