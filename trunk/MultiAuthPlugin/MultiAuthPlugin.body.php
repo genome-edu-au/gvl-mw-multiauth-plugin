@@ -39,7 +39,7 @@ require_once("$IP/includes/AuthPlugin.php");
  * <i>This plugin was developed and tested with MW 1.13.4 and MW 1.15.1</i>
  *
  * @author Florian Löffler (RRZE, unrza249)
- * @version 1.3.0
+ * @version 1.3.1
  */
 
 class MultiAuthPlugin extends AuthPlugin {
@@ -211,6 +211,18 @@ class MultiAuthPlugin extends AuthPlugin {
 			case 'simplesamlphp':
 				$ssphpPath = $this->config['paths']['libs']['simplesamlphp'];
 
+				// TODO put this somewhere else
+				// switch to simpleSAMLphp session
+				if (session_id()) {
+					$oldSessionName = session_name();
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Closing existing session '{$oldSessionName}' for simpleSAMLphp.");
+					session_write_close();
+				}
+				//session_name("simpleSAMLphp");
+				//session_start();
+				//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "SESSION:\n" . print_r($_SESSION, true) . "\n");
+
+
 				if (file_exists($ssphpPath . "/www/_include.php")) {
 					// load simpleSAMLphp library
 					require_once($ssphpPath . "/www/_include.php");
@@ -218,7 +230,8 @@ class MultiAuthPlugin extends AuthPlugin {
 					// Load simpleSAMLphp configuration and session.
 					$config = SimpleSAML_Configuration::getInstance();
 					$session = SimpleSAML_Session::getInstance();
-
+					//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "SAML-SESSION:\n" . print_r($session, true) . "\n");
+						
 					$ssphpAttrs = array();
 					if ($session->isValid('saml2')) {
 						// retrieve attributes
@@ -243,6 +256,19 @@ class MultiAuthPlugin extends AuthPlugin {
 				else {
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Could not load SimpleSAMLphp lib from '{$ssphpPath}'.");
 				}
+
+
+				// TODO put this somewhere else
+				// switch back to old session
+				session_write_close();
+				if (isset($oldSessionName)) {
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Restoring previous session '{$oldSessionName}'.");
+					session_write_close();
+					session_name($oldSessionName);
+					session_start();
+				}
+
+
 				break;
 
 				/*
@@ -878,13 +904,25 @@ class MultiAuthPlugin extends AuthPlugin {
 		$this->enterUserLoadFromSessionHook();
 
 		
+		// TODO put this somewhere else and invent a config option
 		if (session_id() == '') {
-			// FIXME This is not needed cause the session should already be started - or not?
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Initiating MW session." );
+			// Normally MW should create the session itself, but if you delete it manually you're gonna crash
 			global $wgCookiePrefix;
-			session_name($wgCookiePrefix . "_session");
+			$MW_sessionName = $wgCookiePrefix . "_session";
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "RECOVERY: Initiating MW session '{$MW_sessionName}'." );
+			session_name($MW_sessionName);
 			session_start();
 		}
+		else {
+			// This should be the case most of the time
+			$MW_sessionName = session_name();
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Using existing MW session '{$MW_sessionName}'." );
+			
+		}
+
+		// TODO put this somewhere else and invent a config option
+		//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "COOKIE: " . print_r($_COOKIE,true) );
+
 
 		// try to retrieve the a previously stored authentication method from MW's session
 		$this->loadCurrentMethodNameFromSession();
