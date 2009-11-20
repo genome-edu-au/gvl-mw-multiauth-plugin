@@ -101,7 +101,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		// start the whole thing up...
 		$this->config = array();
 		$this->loadConfig();
-		$this->loadCurrentMethodNameFromSession();
+		//$this->loadCurrentMethodNameFromSession();
 		$this->updateConfiguredMethods();
 	}
 
@@ -427,7 +427,8 @@ class MultiAuthPlugin extends AuthPlugin {
 			// Hardcoded requirement: We really need the username!!
 			$username = isset($attrs['username'])?$attrs['username']:'';
 			if ($username == '') {
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Missing username. Cannot login.");
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Missing username.");
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Cannot login.");
 				return false;
 			}
 
@@ -457,12 +458,12 @@ class MultiAuthPlugin extends AuthPlugin {
 
 				if ($user->isLoggedIn()) {
 					$user->setCookies();
-					
+
 					if ($autoCreated || $this->config['internal']['enableAutoUpdateUsers']) {
 						$this->modifyUserIfNeeded($user, $attrs);
 					}
 
-					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Logged in user '$username' via SSO.");
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Logged in user '$username' via method '{$methodName}'.");
 					return true;
 				}
 				else {
@@ -864,7 +865,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		/*
 		 * RECURSION PREVENTION
 		 * This is no error!
-		 * We need this to hack in the login mechanism of mediawiki in the
+		 * We need this to hack in the login mechanism of Mediawiki in the
 		 * following way:
 		 *  - first try what would have been done anyway (login via session)
 		 *  - if that fails move on to our plugin code
@@ -876,6 +877,17 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 		$this->enterUserLoadFromSessionHook();
 
+		
+		if (session_id() == '') {
+			// FIXME This is not needed cause the session should already be started - or not?
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Initiating MW session." );
+			global $wgCookiePrefix;
+			session_name($wgCookiePrefix . "_session");
+			session_start();
+		}
+
+		// try to retrieve the a previously stored authentication method from MW's session
+		$this->loadCurrentMethodNameFromSession();
 
 
 		// try to log the user in
@@ -895,6 +907,12 @@ class MultiAuthPlugin extends AuthPlugin {
 			}
 
 			$this->leaveUserLoadFromSessionHook();
+		}
+		else {
+			if ($this->getCurrentMethodName() === null) {
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "User was logged in from session but no method could be loaded from the session. Assuming method 'local' for recovery.");
+				$_SESSION['MA_methodName'] = 'local';
+			}
 		}
 
 		return true;

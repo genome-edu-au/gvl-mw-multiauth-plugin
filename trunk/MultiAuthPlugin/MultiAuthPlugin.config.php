@@ -181,13 +181,13 @@ $config['internal'] = array(
 		 * SAMPLES
 		 * This should be commented out in production!
 		 */
-/*
-		'sample-shibboleth-default',
-		'sample-shibboleth-restricted',
-		'sample-shibboleth-someApp',
-		'sample-simplesamlphp-default',
-		'sample-simplesamlphp-someIdP',
-*/
+
+//		'sample-shibboleth-default',
+//		'sample-shibboleth-restricted',
+//		'sample-shibboleth-someApp',
+//		'sample-simplesamlphp-default',
+//		'sample-simplesamlphp-someIdP',
+
 	),
 
 		
@@ -263,7 +263,7 @@ $config['debug'] = array(
 	 * In short: A dump of the $authData array.
 	 * DEFAULT: 'logRetrievedAttributeData' => false,
 	 */
-	'logRetrievedAttributeData' => false,
+	'logRetrievedAttributeData' => true,
 
 );
 

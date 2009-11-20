@@ -27,7 +27,12 @@ if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a vali
 // FIXME GRRR: If this is not here simpleSAMLphp will not be able to retrieve its' session. 
 // Also we might get other problems with saving the method name.
 // This _seems_ to have no side effects.
-session_start();
+
+//global $wgCookiePrefix;
+//session_name($wgCookiePrefix . "_session");
+//session_name("SimpleSAMLphp_SESSION");
+//session_start();
+
 
 require_once("MultiAuthPlugin.body.php");
 
