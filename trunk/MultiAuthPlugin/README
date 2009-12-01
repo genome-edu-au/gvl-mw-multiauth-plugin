@@ -43,10 +43,9 @@ SimpleSAMLphp, and so on.
 
 2. Requirements
 ---------------
-The MediaWiki MultiAuthPlugin was developed and	tested with MediaWiki v1.13.4
-because that was the version we were using when development started.
-As far as we can tell it also works with the newest MediaWiki v1.15.1 but we
-didn't test this productively, yet.
+The MediaWiki MultiAuthPlugin was developed and	tested using MediaWiki v1.13.4
+and v1.15.1. So the MultiAuthPlugin should be working flawlessly with these 
+versions. 
 
 
 
@@ -62,15 +61,15 @@ original login/logout special pages. This way the user can choose how he would
 like to authenticate from the configured methods.
 
 The plugin allows you to 
-	- configure multiple authentication methods in parallel
-		currently: Shibboleth, SimpleSAMLphp, local, OpenID (in development)
-	- selectively activate/deactivate each method without loosing 
-	  the configuration
-	- auto-create local user accounts if authenticated externally, if you like
-	- send e-mail notification (e.g. about auto-created users) to a specified
-	  e-mail address
-	- completely forbid local authentication, if you like
-	- configure a redirect to a corporate logout page after MW logout
+	- use local MW authentication in parallel with external authentication
+	- completely forbid local authentication - if desired
+	- configure an external authentication library for SSO
+		Currently one of {Shibboleth, SimpleSAMLphp} is possible at a time
+	- auto-create local user accounts if authenticated externally
+	- auto-update changed user preferences in local user accounts if 
+		authenticated externally
+	- send e-mail notification about auto-created users to a configurable e-mail 
+		address
 
 
 If you make the log/ directory writeable the extension also provides a 
