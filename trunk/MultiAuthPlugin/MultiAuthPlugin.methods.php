@@ -33,12 +33,12 @@ $config['methods'] = array(
 	'local' => array(
 		'login' => array(
 			'text' => 'Login (local)',
-			'href' => SpecialPage::getTitleFor('Userlogin')->escapeFullURL(),
+			'href' => SpecialPage::getTitleFor('Userlogin')->escapeFullURL() . '?returnto={RETURN_URL}',
 		),
 		
 		'logout' => array(
 			'text' => 'Logout (local)',
-			'href' => SpecialPage::getTitleFor('Userlogout')->escapeFullURL(),
+			'href' => SpecialPage::getTitleFor('Userlogout')->escapeFullURL() . '?returnto={RETURN_URL}',
 		),
 		
 		'attributes' => array(),

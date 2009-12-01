@@ -122,7 +122,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "SESSION['MA_methodName'] = {$methodName}");
 			
 			// init the external login
-			$target = $this->buildLink($method);
+			$target = $this->buildLink($methodName);
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Redirecting to SSO login process: {$target}");
 			header("Location: " . $target);
 			exit;
@@ -164,7 +164,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		foreach ($activatedMethods as $methodName => $method) {
 			$link = $method['login'];
 			$link_text = $link['text'];
-			$link_href = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . '?method=' . $methodName;
+			$link_href = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . '?returnto=' . $_REQUEST['returnto']. '&method=' . $methodName;
 				
 			// configure the link
 			$this->linkList['MA_' . $methodName . '_Login'] = array(
@@ -177,12 +177,13 @@ class MultiAuthSpecialLogin extends SpecialPage {
 	/**
 	 * Builds a proper login link for the given method object.
 	 *
-	 * @param $method
-	 * the method object to use for login
+	 * @param $methodName
+	 * the method name to use for login
 	 * @return String
 	 * properly built login link for the given method
 	 */
-	private function buildLink($method) {
+	private function buildLink($methodName) {
+		$method = $this->multiAuthPlugin->getMethod($methodName);
 		$link = $method['login'];
 		$link_href = $link['href'];
 
@@ -192,9 +193,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 			}
 			else {
 				$returnto = (isset($_REQUEST['returnto']))?'?returnto='.$_REQUEST['returnto']:'';
-
-				$returnTitle = SpecialPage::getTitleFor('MultiAuthSpecialLogin');
-				$return_url = $returnTitle->escapeFullURL($returnto);
+				$return_url = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL(). $returnto;
 			}
 
 			$link_href = str_replace('{RETURN_URL}', wfUrlencode($return_url), $link_href);

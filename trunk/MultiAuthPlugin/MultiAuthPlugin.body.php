@@ -856,7 +856,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		unset($personal_urls['logout']);
 
 		// Build link to the login/logout special pages of the MultiAuthPlugin
-		$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL();
+		$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . "?returnto=" . $returnto;
 		$logoutLink = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeFullURL();
 
 		if (!$this->isLoggedIn()) {
