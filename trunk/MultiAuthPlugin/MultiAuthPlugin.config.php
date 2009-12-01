@@ -36,7 +36,7 @@ $config['general'] = array(
 	 * Current version number string and home url of the plugin.
 	 * PLEASE DON'T CHANGE THIS, THAT'S THE AUTHOR'S JOB ;)
 	 */
-	'version' => '1.3.1',
+	'version' => '1.3.2',
 	'url' => 'https://www.pp.wiki.uni-erlangen.de/index.php/MediaWikiAuthPlugin',
 
 );
