@@ -37,12 +37,12 @@ $messages['de'] = array(
 	// see http://www.mediawiki.org/wiki/Manual:Special_pages#The_Messages_File
 	'multiauthspeciallogin' => 'MultiAuth Anmeldeseite',  
 	
-	'credits_name' => 'MultiAuth Anmeldeseite',
-	'credits_author' => 'Regionales Rechenzentrum Erlangen (RRZE), Florian Löffler',
-	'credits_description' => 'Login Spezialseite als Teil der Multi Authentifizierungserweiterung',
+	'multiauthspeciallogin-credits_name' => 'MultiAuth Anmeldeseite',
+	'multiauthspeciallogin-credits_author' => 'Regionales Rechenzentrum Erlangen (RRZE), Florian Löffler',
+	'multiauthspeciallogin-credits_description' => 'Login Spezialseite als Teil der Multi Authentifizierungserweiterung',
 
-	'msg_loginSuccess' => 'Erfolgreich eingeloggt!',
-	'msg_notAuthorized' => 'Erfolgreiche externe Authentifizierung.<br/>Sie besitzen jedoch leider keine Zugriffsberechtigung für dieses Wiki!'
+	'multiauthspeciallogin-msg_loginSuccess' => 'Erfolgreich eingeloggt!',
+	'multiauthspeciallogin-msg_notAuthorized' => 'Erfolgreiche externe Authentifizierung.<br/>Sie besitzen jedoch leider keine Zugriffsberechtigung für dieses Wiki!'
 );
 
 
@@ -51,13 +51,16 @@ $messages['en'] = array(
 	// see http://www.mediawiki.org/wiki/Manual:Special_pages#The_Messages_File
 	'multiauthspeciallogin' => 'MultiAuth login page',  
 	
-	'credits_name' => 'MultiAuth login page',
-	'credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
-	'credits_description' => 'Login special page as part of the Multi Authentication Plugin',
+	'multiauthspeciallogin-credits_name' => 'MultiAuth login page',
+	'multiauthspeciallogin-credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
+	'multiauthspeciallogin-credits_description' => 'Login special page as part of the Multi Authentication Plugin',
 
-	'msg_loginSuccess' => 'Successfully logged in!',
-	'msg_notAuthorized' => 'Successful external authentication.<br/>Unfortunately you do not have the necessary rights to access this wiki.'
+	'multiauthspeciallogin-msg_loginSuccess' => 'Successfully logged in!',
+	'multiauthspeciallogin-msg_notAuthorized' => 'Successful external authentication.<br/>Unfortunately you do not have the necessary rights to access this wiki.'
 );
+
+if (MwFunctions::testVersionGEq(1,18))
+	include(dirname(__FILE__) . '/SpecialLogin.alias.php'); // Hack for post 1.18.0
 
 
 ?>

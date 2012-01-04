@@ -159,7 +159,6 @@ $config['methods'] = array(
 		),
 	),
 	
-	
 	/*
 	 * SAMPLE
 	 * SimpleSamlPHP SP basic   
@@ -167,7 +166,8 @@ $config['methods'] = array(
 	'sample-simplesamlphp-default' => array(
 		'login' => array(
 			'text' => 'SAMPLE - Login via SimpleSamlPHP SP default target',
-			'href' => WebFunctions::getBaseURL() .  '/simplesaml/saml2/sp/initSSO.php?RelayState={RETURN_URL}',
+			'href' => WebFunctions::getBaseURL() .  '/simplesaml/saml2/sp/initSSO.php?RelayState={RETURN_URL}&spentityid=localhost-sp',
+			//'href' => WebFunctions::getBaseURL() .  '/simplesaml/module.php/core/authenticate.php?as=localhost-sp',
 		),
 	
 		'logout' => array(

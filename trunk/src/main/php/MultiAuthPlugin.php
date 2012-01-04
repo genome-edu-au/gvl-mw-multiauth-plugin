@@ -29,28 +29,32 @@ if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a vali
    ******************************************** */
 
 require_once("includes/WebFunctions.php");
-
-
-
-/* ********************************************
-   *                PLUGIN SETUP              *
-   ******************************************** */
-
-require_once("MultiAuthPlugin.setup.php");
-
-
-
-
-// DEBUG
-// MAKE SURE THIS IS COMMENTED OUT IN PRODUCTION !!!
-
-//$wgDebugLogFile = "debug.log";  // activate MW's logging mechanism
-//print_r($GLOBALS);
-$wgShowExceptionDetails = true; 
-//error_reporting (E_ALL); ini_set("display_errors", 1); 
-//echo "<!--"; print_r($_SERVER); print_r($_COOKIE); print_r($_REQUEST); print_r($_SESSION); echo "--> <b>DEBUGGING ENABLED</b>";
-
-
-// MAKE SURE THIS IS COMMENTED OUT IN PRODUCTION !!!
-
+require_once("includes/MwFunctions.php");
+	
+	
+if (!MwFunctions::isAsyncLoadRequest()) {
+	// DON'T DO ANYTHING IF THIS IS A REQUEST TO LOAD.PHP
+	
+	
+	/* ********************************************
+	   *                PLUGIN SETUP              *
+	   ******************************************** */
+	
+	require_once("MultiAuthPlugin.setup.php");
+	
+	
+	
+	
+	// DEBUG
+	// MAKE SURE THIS IS COMMENTED OUT IN PRODUCTION !!!
+	
+	//$wgDebugLogFile = "debug.log";  // activate MW's logging mechanism
+	//print_r($GLOBALS);
+	$wgShowExceptionDetails = true; 
+	//error_reporting (E_ALL); ini_set("display_errors", 1); 
+	echo "<!--"; print_r($_SERVER); print_r($_COOKIE); print_r($_REQUEST); print_r($_SESSION); echo "--> <b>DEBUGGING ENABLED</b>";
+	
+	
+	// MAKE SURE THIS IS COMMENTED OUT IN PRODUCTION !!!
+}
 ?>

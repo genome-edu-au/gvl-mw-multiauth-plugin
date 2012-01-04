@@ -33,20 +33,20 @@ $messages = array();
 
 
 $messages['de'] = array(
-	'credits_name' => 'MultiAuth Erweiterung',
-	'credits_author' => 'Regionales Rechenzentrum Erlangen (RRZE), Florian Löffler',
-	'credits_description' => 'Flexibel konfigurierbare Authentifizierungserweiterung',
-	'special_login_link' => 'Anmelden',
-	'special_logout_link' => 'Abmelden',
+	'multiauth-credits_name' => 'MultiAuth Erweiterung',
+	'multiauth-credits_author' => 'Regionales Rechenzentrum Erlangen (RRZE), Florian Löffler',
+	'multiauth-credits_description' => 'Flexibel konfigurierbare Authentifizierungserweiterung',
+	'multiauth-special_login_link' => 'Anmelden',
+	'multiauth-special_logout_link' => 'Abmelden',
 );
 
 
 $messages['en'] = array(
-	'credits_name' => 'MultiAuth Plugin',
-	'credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
-	'credits_description' => 'Highly configurable authentication plugin',
-	'special_login_link' => 'Login',
-	'special_logout_link' => 'Logout',
+	'multiauth-credits_name' => 'MultiAuth Plugin',
+	'multiauth-credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
+	'multiauth-credits_description' => 'Highly configurable authentication plugin',
+	'multiauth-special_login_link' => 'Login',
+	'multiauth-special_logout_link' => 'Logout',
 );
 
 

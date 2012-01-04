@@ -146,35 +146,40 @@ function deferredMultiAuthSetup() {
 	 ********************************************/
 
 	global $wgExtensionMessagesFiles;
-
-	// localisation
 	$wgExtensionMessagesFiles['MultiAuthPlugin'] =  dirname(__FILE__) . '/MultiAuthPlugin.i18n.php';
-	wfLoadExtensionMessages('MultiAuthPlugin');
+	
+	if ( function_exists( 'wfLoadExtensionMessages' ) ) 
+		wfLoadExtensionMessages('MultiAuthPlugin'); // pre 1.18.0
+	
+	
+	if (MwFunctions::testVersionGEq(1,18)) 
+		MwFunctions::updateMessageCache(); // Hack for post 1.18.0
+
 
 	/********************************************
 	 *                 CREDITS                  *
 	 ********************************************/
 
 	global $wgExtensionCredits;
-
-	// credits
 	$wgExtensionCredits['other'][] = array(
 		'path' 			=> __FILE__,
-		'name' 			=> wfMsg('credits_name'),
+		'name' 			=> wfMsg('multiauth-credits_name'),
 		'version'		=> $wgMultiAuthPlugin->getVersion(),  // see MultiAuthPlugin.config.php to modify version number
-		'author' 		=> wfMsg('credits_author'), 
+		'author' 		=> wfMsg('multiauth-credits_author'), 
 		'url' 			=> $wgMultiAuthPlugin->getURL(), 
-		'description' 	=> wfMsg('credits_description')
+		'description' 	=> wfMsg('multiauth-credits_description')
 	);
 
+	
+	
 
-	// reset the aliases chache to ensure all recently and subsequently added
-	// page aliases are recongnized despite the fact that the MA extension
+	// reset the aliases cache to ensure all recently and subsequently added
+	// page aliases are recognized despite the fact that the MA extension
 	// already uses URL building functions
 	// TODO File bug report that the cache needs a dirty flag!
-	global $wgContLang;
-	if (isset($wgContLang->mExtendedSpecialPageAliases))
-	unset($wgContLang->mExtendedSpecialPageAliases);
+//  	global $wgContLang;
+//  	if (isset($wgContLang->mExtendedSpecialPageAliases))
+//  	unset($wgContLang->mExtendedSpecialPageAliases);
 
 
 	return true;
@@ -182,5 +187,6 @@ function deferredMultiAuthSetup() {
 // register deferred setup functionn
 global $wgExtensionFunctions;
 $wgExtensionFunctions[] = 'deferredMultiAuthSetup';
+
 
 ?>

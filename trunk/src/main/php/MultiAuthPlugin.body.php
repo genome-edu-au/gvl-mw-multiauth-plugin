@@ -211,6 +211,13 @@ class MultiAuthPlugin extends AuthPlugin {
 			case 'simplesamlphp':
 				$ssphpPath = $this->config['paths']['libs']['simplesamlphp'];
 
+				/*
+				require_once($ssphpPath . '/lib/_autoload.php');
+				$as = new SimpleSAML_Auth_Simple('localhost-sp');
+				$attributes = $as->getAttributes();
+				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . print_r($attributes,true));
+				*/
+				
 				// TODO put this somewhere else
 				// switch to simpleSAMLphp session
 				if (session_id()) {
@@ -861,7 +868,7 @@ class MultiAuthPlugin extends AuthPlugin {
 
 		if (!$this->isLoggedIn()) {
 			$personal_urls['MA_login'] = array(
-				'text' => wfMsg('special_login_link'),
+				'text' => wfMsg('multiauth-special_login_link'),
 				'href' => $loginLink,
 			);
 		}
@@ -938,7 +945,12 @@ class MultiAuthPlugin extends AuthPlugin {
 			}
 			else {
 				// turn login control over to MultiAuth
+				
+				/*
+				 * HERE STARTS THE SSO STUFF
+				 */
 				$loginSuccessMA = $this->login($user);
+				
 				if (!$loginSuccessMA) {
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Failed to log in.");
 				}

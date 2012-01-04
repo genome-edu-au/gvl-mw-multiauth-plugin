@@ -37,12 +37,12 @@ $messages['de'] = array(
 	// see http://www.mediawiki.org/wiki/Manual:Special_pages#The_Messages_File
 	'multiauthspeciallogout' => 'MultiAuth Abmeldeseite',  
 	
-	'credits_name' => 'MultiAuth Abmeldeseite',
-	'credits_author' => 'Regionales Rechenzentrum Erlangen (RRZE), Florian Löffler',
-	'credits_description' => 'Logout Spezialseite als Teil der Multi Authentifizierungserweiterung',
+	'multiauthspeciallogout-credits_name' => 'MultiAuth Abmeldeseite',
+	'multiauthspeciallogout-credits_author' => 'Regionales Rechenzentrum Erlangen (RRZE), Florian Löffler',
+	'multiauthspeciallogout-credits_description' => 'Logout Spezialseite als Teil der Multi Authentifizierungserweiterung',
 
-	'msg_logoutSuccess' => 'Erfolgreich ausgeloggt.',
-	'msg_logoutFailure' => 'Etwas ist schief gelaufen.<br/>Nicht ausgeloggt!',
+	'multiauthspeciallogout-msg_logoutSuccess' => 'Erfolgreich ausgeloggt.',
+	'multiauthspeciallogout-msg_logoutFailure' => 'Etwas ist schief gelaufen.<br/>Nicht ausgeloggt!',
 );
 
 
@@ -51,13 +51,16 @@ $messages['en'] = array(
 	// see http://www.mediawiki.org/wiki/Manual:Special_pages#The_Messages_File
 	'multiauthspeciallogout' => 'MultiAuth logout page',  
 	
-	'credits_name' => 'MultiAuth logout page',
-	'credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
-	'credits_description' => 'Logout special page as part of the Multi Authentication Plugin',
+	'multiauthspeciallogout-credits_name' => 'MultiAuth logout page',
+	'multiauthspeciallogout-credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
+	'multiauthspeciallogout-credits_description' => 'Logout special page as part of the Multi Authentication Plugin',
 
-	'msg_logoutSuccess' => 'Successfully logged out.',
-	'msg_logoutFailure' => 'Something went wrong.<br/>Not logged out!',
+	'multiauthspeciallogout-msg_logoutSuccess' => 'Successfully logged out.',
+	'multiauthspeciallogout-msg_logoutFailure' => 'Something went wrong.<br/>Not logged out!',
 );
+
+if (MwFunctions::testVersionGEq(1,18))
+	include(dirname(__FILE__) . '/SpecialLogout.alias.php'); // Hack for post 1.18.0
 
 
 ?>

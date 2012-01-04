@@ -1,0 +1,6 @@
+04.01.2012
+----------
+* Bump to version 1.4.0
+* compatibility with Mediawiki 1.18.0
+* worked around some localisation issues 
+* MultiAuth now ignores requests to load.php -> performance

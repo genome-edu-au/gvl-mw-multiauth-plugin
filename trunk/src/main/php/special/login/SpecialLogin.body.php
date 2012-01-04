@@ -32,7 +32,7 @@ if (!defined('MEDIAWIKI')) die('This file is part of MediaWiki. It is not a vali
  *
  */
 class MultiAuthSpecialLogin extends SpecialPage {
-
+	
 	/**
 	 * @var MultiAuthPlugin
 	 * reference to the active instance of the MultiAuthPlugin
@@ -60,6 +60,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 
 		$linkList = array();
 	}
+	
 
 	/**
 	 * This function is called when the special page is accessed
@@ -79,7 +80,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		if ($this->multiAuthPlugin->isLoggedIn()) {
 
 			// login success
-			$html .= "<p>" . wfMsg('msg_loginSuccess') . "</p>\n";
+			$html .= "<p>" . wfMsg('multiauthspeciallogin-msg_loginSuccess') . "</p>\n";
 
 		}
 		else if (isset($_GET['method']) && $this->multiAuthPlugin->isValidMethod($_GET['method'])) {
@@ -91,7 +92,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		else if (!is_null($this->multiAuthPlugin->getCurrentMethodName()) && $this->multiAuthPlugin->getCurrentMethodName() != 'local') {
 				
 			// external authentication success but not authorized
-			$html .= "<p>" . wfMsg('msg_notAuthorized') . "</p>\n";
+			$html .= "<p>" . wfMsg('multiauthspeciallogin-msg_notAuthorized') . "</p>\n";
 			unset($_SESSION['MA_methodName']);
 				
 		}
@@ -121,11 +122,43 @@ class MultiAuthSpecialLogin extends SpecialPage {
 			$_SESSION['MA_methodName'] = $methodName;
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "SESSION['MA_methodName'] = {$methodName}");
 			
+			
+			
+			if ($methodName == 'local') {
+				$return_url = (isset($_REQUEST['returnto']))?$_REQUEST['returnto']:'';
+			}
+			else {
+				$returnto = (isset($_REQUEST['returnto']))?'?returnto='.$_REQUEST['returnto']:'';
+				$return_url = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL(). $returnto;
+			}
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "returnTo = " . $return_url);
+			
 			// init the external login
+			$ssphpPath = $this->multiAuthPlugin->config['paths']['libs']['simplesamlphp'];
+			require_once($ssphpPath . '/lib/_autoload.php');
+			
+			$as = new SimpleSAML_Auth_Simple('localhost-sp');
+			$as->requireAuth();
+			
+			$attributes = $as->getAttributes();
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . print_r($attributes,true));
+			
+			
+			/*
+			
+			
+			$ssphpPath = $this->multiAuthPlugin->config['paths']['libs']['simplesamlphp'];
+			require_once($ssphpPath . '/lib/_autoload.php');
+			SimpleSAML_Auth_Default::initLogin('localhost-sp', $return_url);
+			*/
+			
+			
+			/*
 			$target = $this->buildLink($methodName);
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Redirecting to SSO login process: {$target}");
 			header("Location: " . $target);
 			exit;
+			*/
 		}
 	}
 
@@ -201,6 +234,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		return $link_href;
 	}
 
+	
 }
 
 ?>

@@ -77,7 +77,7 @@ class MultiAuthSpecialLogout extends SpecialPage {
 				exit; // Stop execution here
 			}
 			else {
-				$html .= "<p>" . wfMsg('msg_logoutSuccess') . "</p>\n";
+				$html .= "<p>" . wfMsg('multiauthspeciallogout-msg_logoutSuccess') . "</p>\n";
 			}
 
 		}
@@ -119,12 +119,12 @@ class MultiAuthSpecialLogout extends SpecialPage {
 			// Run the logout complete hook for local logout
 			wfRunHooks('UserLogoutComplete', array(&$wgUser, &$injectedHtml, $oldName));
 
-			$html .= "<p>" . wfMsg('msg_logoutSuccess') . "</p>\n";
+			$html .= "<p>" . wfMsg('multiauthspeciallogout-msg_logoutSuccess') . "</p>\n";
 			$html .= $injectedHtml;
 			return true;
 		}
 		else {
-			$html .= "<p>" . wfMsg('msg_logoutFailure') . "</p>\n";
+			$html .= "<p>" . wfMsg('multiauthspeciallogout-msg_logoutFailure') . "</p>\n";
 			return false;
 		}
 	}
@@ -178,7 +178,7 @@ class MultiAuthSpecialLogout extends SpecialPage {
 			exit(); // no execution past here!
 		}
 		else {
-			$html .= "<p>" . wfMsg('msg_logoutFailure') . "</p>\n";
+			$html .= "<p>" . wfMsg('multiauthspeciallogout-msg_logoutFailure') . "</p>\n";
 			return false;
 		}
 	}

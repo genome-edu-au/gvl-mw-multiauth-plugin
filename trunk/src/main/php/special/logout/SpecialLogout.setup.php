@@ -61,22 +61,28 @@ function multiAuthLogoutSetup() {
 	global $wgMultiAuthPlugin;
 
 	// localization
-	$wgExtensionMessagesFiles['MultiAuthSpecialLogout'] =  
-		dirname(__FILE__). '/SpecialLogout.i18n.php';
-	wfLoadExtensionMessages('MultiAuthSpecialLogout');
+	$wgExtensionMessagesFiles['MultiAuthSpecialLogout'] =  dirname(__FILE__). '/SpecialLogout.i18n.php';
+	
+	if ( function_exists( 'wfLoadExtensionMessages' ) )
+		wfLoadExtensionMessages('MultiAuthSpecialLogout'); // pre 1.18.0
 
+	if (MwFunctions::testVersionGEq(1,18))
+		MwFunctions::updateMessageCache(); // Hack for post 1.18.0
+	
+	
 	// aliases
-	$wgExtensionAliasesFiles['MultiAuthSpecialLogout'] = 
-		dirname(__FILE__) . '/SpecialLogout.alias.php';
+	if (!MwFunctions::testVersionGEq(1,18))
+		$wgExtensionAliasesFiles['MultiAuthSpecialLogout'] = dirname(__FILE__) . '/SpecialLogout.alias.php'; // pre 1.18.0
 
+	
 	// credits
 	$wgExtensionCredits['specialpage'][] = array(
 		'path' 			=> __FILE__,
-		'name' 			=> wfMsg('credits_name'),
+		'name' 			=> wfMsg('multiauthspeciallogout-credits_name'),
 		'version'		=> $wgMultiAuthPlugin->getVersion(),
-		'author' 		=> wfMsg('credits_author'), 
+		'author' 		=> wfMsg('multiauthspeciallogout-credits_author'), 
 		'url' 			=> $wgMultiAuthPlugin->getURL(), 
-		'description' 	=> wfMsg('credits_description')
+		'description' 	=> wfMsg('multiauthspeciallogout-credits_description')
 	);
 
 	return true;

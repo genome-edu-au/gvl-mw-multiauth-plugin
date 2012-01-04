@@ -36,8 +36,8 @@ $config['general'] = array(
 	 * Current version number string and home url of the plugin.
 	 * PLEASE DON'T CHANGE THIS, THAT'S THE AUTHOR'S JOB ;)
 	 */
-	'version' => '1.3.2',
-	'url' => 'https://www.pp.wiki.uni-erlangen.de/index.php/MediaWikiAuthPlugin',
+	'version' => '1.4.0',
+	'url' => 'http://multiauth.berlios.de/',
 
 );
 
@@ -57,7 +57,8 @@ $config['paths'] = array(
 	 * 	'simplesamlphp' => dirname(__FILE__) . '/libs/simplesamlphp',
 	 */
 	'libs' => array(
-		'simplesamlphp' => '/var/simplesamlphp',
+		//'simplesamlphp' => '/var/simplesamlphp',
+		'simplesamlphp' => '/home/unrza249/opt/simplesamlphp-1.8.0',
 	),
 
 );
@@ -74,8 +75,8 @@ $config['internal'] = array(
 	 * NOTE: Currently supported libraries are 'shibboleth' (needs running 
 	 * shibd) and 'simplesamlphp' (needs simplesamlphp installed).
 	 */
-	'authLib' => 'shibboleth',
-	//'authLib' => 'simplesamlphp',
+	//'authLib' => 'shibboleth',
+	'authLib' => 'simplesamlphp',
 
 	/*
 	 * In this step authentication data from is acquired and made available in 
@@ -175,7 +176,7 @@ $config['internal'] = array(
 	 */
 	'methods' => array(
 		'local',
-		'shibboleth-default',
+		//'shibboleth-default',
 
 		/*
 		 * SAMPLES
@@ -185,7 +186,7 @@ $config['internal'] = array(
 //		'sample-shibboleth-default',
 //		'sample-shibboleth-restricted',
 //		'sample-shibboleth-someApp',
-//		'sample-simplesamlphp-default',
+		'sample-simplesamlphp-default',
 //		'sample-simplesamlphp-someIdP',
 
 	),
