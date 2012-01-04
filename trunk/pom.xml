@@ -114,16 +114,11 @@
 	<!-- Distribution Management -->
 	<!--
 		For this to work you have to add a server entry to your
-		~/.m2/settings.xml specifiying your login name:
-		
-		<server>
-            <id>multiauth::at::berlios.de</id>
-            <username>loeffler</username>
-        </server>
-        
-		and upload yout public key to the shell server like this:
-		
-		ssh-copy-id loeffler@shell.berlios.de		
+		~/.m2/settings.xml specifiying your login name: <server>
+		<id>multiauth::at::berlios.de</id> <username>loeffler</username>
+		</server> and upload yout public key to the shell server like this:
+
+		ssh-copy-id loeffler@shell.berlios.de
 	-->
 	<distributionManagement>
 		<!-- Site -->
@@ -201,6 +196,61 @@
 			</plugin>
 		</plugins>
 	</build>
+
+
+
+	<profiles>
+		<profile>
+			<id>profile-php-maven</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>release-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Release Repository</name>
+					<url>http://repo1.php-maven.org/release</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+				</pluginRepository>
+				<pluginRepository>
+					<id>snapshot-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Snapshot Repository</name>
+					<url>http://repo1.php-maven.org/snapshot</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+			<repositories>
+				<repository>
+					<id>release-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Release Repository</name>
+					<url>http://repo1.php-maven.org/release</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+				</repository>
+				<repository>
+					<id>snapshot-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Snapshot Repository</name>
+					<url>http://repo1.php-maven.org/snapshot</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+
+
 
 	<!-- Dependencies -->
 	<dependencies>
