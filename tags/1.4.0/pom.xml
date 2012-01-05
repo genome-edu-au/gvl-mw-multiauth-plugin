@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.rrze.mediawiki.plugin.multiauth</groupId>
+	<artifactId>multi-auth-plugin</artifactId>
+	<packaging>php</packaging>
+
+	<!-- Project Info -->
+	<name>Mediawiki MultiAuth Plugin</name>
+	<version>1.4</version>
+	<description>
+		The Mediawiki MultiAuth Plugin provides an easily
+		configurable way to manage multiple authentication scenarios with
+		Mediawiki. This especially includes SSO via Shibboleth and/or
+		SimpleSAMLphp.
+	</description>
+	<url>http://multiauth.berlios.de</url>
+
+	<!-- Properties -->
+	<properties>
+		<project.build.sourceEncoding>
+			UTF-8
+		</project.build.sourceEncoding>
+	</properties>
+
+	<!-- Licences -->
+	<licenses>
+		<license>
+			<name>GNU GENERAL PUBLIC LICENSE, Version 3</name>
+			<url>http://www.gnu.org/licenses/gpl.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<!-- Organization -->
+	<organization>
+		<name>RRZE</name>
+		<url>http://www.rrze.uni-erlangen.de</url>
+	</organization>
+
+	<!-- Developers -->
+	<developers>
+		<developer>
+			<id>unrza249</id>
+			<name>Florian Loeffler</name>
+			<email>florian.loeffler::at::rrze.uni-erlangen.de</email>
+			<organization>RRZE</organization>
+			<organizationUrl>
+				http://www.rrze.uni-erlangen.de
+			</organizationUrl>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<!-- Contributors -->
+	<contributors>
+		<contributor>
+			<name>Hendrik Eggers</name>
+			<email>hendrik.eggers::at::rrze.uni-erlangen.de</email>
+			<organization>RRZE</organization>
+			<organizationUrl>
+				http://www.rrze.uni-erlangen.de
+			</organizationUrl>
+			<roles>
+				<role>Manager</role>
+			</roles>
+		</contributor>
+
+		<contributor>
+			<name>Frank Tröger</name>
+			<email>frank.troeger::at::rrze.uni-erlangen.de</email>
+			<organization>RRZE</organization>
+			<organizationUrl>
+				http://www.rrze.uni-erlangen.de
+			</organizationUrl>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</contributor>
+
+		<contributor>
+			<name>Bastian Melsheimer</name>
+			<email>bastian.melsheimer::at::rrze.uni-erlangen.de</email>
+			<organization>RRZE</organization>
+			<organizationUrl>
+				http://www.rrze.uni-erlangen.de
+			</organizationUrl>
+			<roles>
+				<role>Translator</role>
+			</roles>
+		</contributor>
+
+	</contributors>
+
+
+	<!-- Issue Management -->
+	<issueManagement>
+		<system>BerliosBug Tracking</system>
+		<url>https://developer.berlios.de/bugs/?group_id=11296</url>
+	</issueManagement>
+
+	<!-- Mailing Lists -->
+	<!--
+		mailingLists> <mailingList> <name>multiauth-users</name> <subscribe>
+		multiauth-users-subscribe@lists.berlios.de </subscribe> <unsubscribe>
+		multiauth-users-unsubscribe@lists.berlios.de </unsubscribe>
+		<post>multiauth-users@lists.berlios.de</post> <archive>
+		https://developer.berlios.de/mail/?group_id=11296 </archive>
+		</mailingList> </mailingLists
+	-->
+
+	<!-- Distribution Management -->
+	<!--
+		For this to work you have to add a server entry to your
+		~/.m2/settings.xml specifiying your login name: <server>
+		<id>multiauth::at::berlios.de</id> <username>loeffler</username>
+		</server> and upload yout public key to the shell server like this:
+
+		ssh-copy-id loeffler@shell.berlios.de
+	-->
+	<distributionManagement>
+		<!-- Site -->
+		<site>
+			<id>multiauth::at::berlios.de</id>
+			<url>
+				sftp://shell.berlios.de/home/groups/multiauth/htdocs
+			</url>
+		</site>
+	</distributionManagement>
+
+	<!-- SVN -->
+	<scm>
+		<developerConnection>
+			scm:svn:https://svn.berlios.de/svnroot/repos/multiauth/trunk
+		</developerConnection>
+		<url>https://developer.berlios.de/svn/?group_id=11296</url>
+	</scm>
+
+
+	<!-- CI management -->
+	<!--
+		<ciManagement> <system>continuum</system>
+		<url>http://127.0.0.1:8080/continuum</url> <notifiers> <notifier>
+		<type>mail</type> <sendOnError>true</sendOnError>
+		<sendOnFailure>true</sendOnFailure>
+		<sendOnSuccess>false</sendOnSuccess>
+		<sendOnWarning>false</sendOnWarning>
+		<configuration><address>continuum@127.0.0.1</address></configuration>
+		</notifier> </notifiers> </ciManagement>
+	-->
+
+	<!-- Site generation -->
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.phpmaven</groupId>
+				<artifactId>maven-php-plugin</artifactId>
+				<version>1.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.4</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report-only</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
+
+
+	<!-- Build -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.phpmaven</groupId>
+				<artifactId>maven-php-plugin</artifactId>
+				<extensions>true</extensions>
+				<version>1.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>2.1</version>
+				<configuration>
+					<chmod>true</chmod>
+					<chmodMode>gu+rw</chmodMode>
+					<chmodOptions>-Rf</chmodOptions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+
+
+	<profiles>
+		<profile>
+			<id>profile-php-maven</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>release-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Release Repository</name>
+					<url>http://repo1.php-maven.org/release</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+				</pluginRepository>
+				<pluginRepository>
+					<id>snapshot-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Snapshot Repository</name>
+					<url>http://repo1.php-maven.org/snapshot</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+			<repositories>
+				<repository>
+					<id>release-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Release Repository</name>
+					<url>http://repo1.php-maven.org/release</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+				</repository>
+				<repository>
+					<id>snapshot-repo1.php-maven.org</id>
+					<name>PHP-Maven 2 Snapshot Repository</name>
+					<url>http://repo1.php-maven.org/snapshot</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+
+
+
+	<!-- Dependencies -->
+	<dependencies>
+		<dependency>
+			<groupId>org.phpunit</groupId>
+			<artifactId>phpunit5</artifactId>
+			<version>3.3.9</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+</project>
