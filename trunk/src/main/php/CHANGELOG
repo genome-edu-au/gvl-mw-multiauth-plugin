@@ -1,11 +1,3 @@
-04.01.2012
-----------
-* Bump to version 1.4.0
-* compatibility with Mediawiki 1.18.0
-* worked around some localisation issues 
-* MultiAuth now ignores requests to load.php -> performance
-
-
 05.01.2012
 ----------
 * Still working on 1.4.0 
@@ -20,3 +12,13 @@
   authentication library
 * 'local' authentication method is now hardcoded and removed from configuration options
 * Open issue with call to MessageCache->recache() on every page view!
+
+
+04.01.2012
+----------
+* Bump to version 1.4.0
+* compatibility with Mediawiki 1.18.0
+* worked around some localisation issues 
+* MultiAuth now ignores requests to load.php -> performance
+
+

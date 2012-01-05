@@ -51,15 +51,15 @@
 			<item name="BerliOS" href="http://www.berlios.de/" />
 		</links>
 
-		<!--menu name="MultiAuth" collapse="false">
+		<menu name="MultiAuth" collapse="false">
 			<item name="Introduction" href="/introduction.html" />
-			<item name="Download" href="/download.html" />
+<!-- 			<item name="Download" href="/download.html" />
 			<item name="FAQ" href="/faq.html" />
 			<item name="CLI options" href="/cli.html" />
 			<item name="Template language" href="/template.html" />
 			<item name="Filters" href="/filters.html" />
-			<item name="Examples" href="/examples.html" />
-		</menu-->
+			<item name="Examples" href="/examples.html" /> -->
+		</menu>
 
 		${reports}
 
