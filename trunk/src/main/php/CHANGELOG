@@ -19,3 +19,4 @@
 * Also added per method auth configuration options depending on the configured
   authentication library
 * 'local' authentication method is now hardcoded and removed from configuration options
+* Open issue with call to MessageCache->recache() on every page view!

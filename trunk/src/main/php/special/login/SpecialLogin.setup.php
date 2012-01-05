@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is part of the MediaWiki MultiAuth extension.
-* Copyright 2009, RRZE, and individual contributors
+* Copyright 2009-2012, RRZE, and individual contributors
 * as indicated by the @author tags. See the copyright.txt file in the
 * distribution for a full listing of individual contributors.
 *

@@ -1,6 +1,7 @@
+05.01.2012
 
-MediaWiki MultiAuthPlugin
--------------------------
+MediaWiki MultiAuthPlugin v1.4.0
+--------------------------------
 
 0. Quick usage
 --------------
@@ -43,9 +44,9 @@ SimpleSAMLphp, and so on.
 
 2. Requirements
 ---------------
-The MediaWiki MultiAuthPlugin was developed and	tested using MediaWiki v1.13.4
-and v1.15.1. So the MultiAuthPlugin should be working flawlessly with these 
-versions. 
+The MediaWiki MultiAuthPlugin v1.4.0 was developed and tested using MediaWiki v1.18.0
+and SimpleSamlPHP v1.8.0. 
+So it should be working flawlessly with these versions. 
 
 
 
@@ -64,7 +65,7 @@ The plugin allows you to
 	- use local MW authentication in parallel with external authentication
 	- completely forbid local authentication - if desired
 	- configure an external authentication library for SSO
-		Currently one of {Shibboleth, SimpleSAMLphp} is possible at a time
+		Currently one of {Shibboleth, SimpleSAMLphp} or both is possible
 	- auto-create local user accounts if authenticated externally
 	- auto-update changed user preferences in local user accounts if 
 		authenticated externally
@@ -78,4 +79,9 @@ debug.log file to help you identify possible errors.
 
 4. Notes
 --------
-None, yet.
+There are some localisation issues known. At the moment the MultiAuthPlugin
+calls MessageCache->recache() once per call which is less than ideal for
+performance reasons.
+If someone can provide a fix for this you would be very welcome to let me know ;) 
+
+

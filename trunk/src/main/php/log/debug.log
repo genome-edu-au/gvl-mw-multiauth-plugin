@@ -12550,3 +12550,23 @@ Array
 2012-01-05 15:51:23  test_mw_1_18_0: MultiAuthPlugin::loginFromSession: No session found.
 2012-01-05 15:51:23  test_mw_1_18_0: MultiAuthPlugin::userLoadFromSessionHook: Nothing more to do for MultiAuth.
 2012-01-05 15:51:23  test_mw_1_18_0: MwFunctions::updateMessageCache: Detected lang: en
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::__construct: 
+==================================================================================================
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::__construct: *** I'm alive!
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::__construct: Detected MW session name: test_mw_1_18_0_session
+2012-01-05 15:55:22  test_mw_1_18_0: MwFunctions::getVersionParts: Detected MW version: major 1, minor 18, patch 0
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::userLoadFromSessionHook: Using existing MW session 'test_mw_1_18_0_session'.
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::loadCurrentMethodNameFromSession: No method chosen, yet.
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::loginFromSession: Trying to log in a user from session.
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::loginFromSession: No session found.
+2012-01-05 15:55:22  test_mw_1_18_0: MultiAuthPlugin::userLoadFromSessionHook: Nothing more to do for MultiAuth.
+2012-01-05 15:55:22  test_mw_1_18_0: MwFunctions::updateMessageCache: Detected lang: en
+2012-01-05 15:55:23  test_mw_1_18_0: MultiAuthSpecialLogin::initLogin: : SESSION['MA_methodName'] = simplesamlphp-default
+2012-01-05 15:55:23  test_mw_1_18_0: MultiAuthSpecialLogin::initLogin: : Method auth settings: Array
+(
+    [lib] => simplesamlphp
+    [idpentityid] => localhost-idp
+    [spentityid] => default-sp
+)
+2012-01-05 15:55:23  test_mw_1_18_0: MultiAuthSpecialLogin::buildReturnURL: : returnTo = http://localhost/mediawiki-1.18.0/index.php/Special:MultiAuthSpecialLogin?returnto=Special:SpecialPages
+2012-01-05 15:55:23  test_mw_1_18_0: MultiAuthSpecialLogin::initLogin: : Redirecting to SSO login process: [SimpleSamlPHP] ReturnTo = http://localhost/mediawiki-1.18.0/index.php/Special:MultiAuthSpecialLogin?returnto=Special:SpecialPages
