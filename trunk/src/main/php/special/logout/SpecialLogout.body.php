@@ -139,43 +139,49 @@ class MultiAuthSpecialLogout extends SpecialPage {
 		global $wgUser;
 		$oldName = $wgUser->getName();
 
-		// prepare data for external logout
 		$currentMethod = $this->multiAuthPlugin->getCurrentMethod();
-		$link = $currentMethod['logout'];
-		$link_text = $link['text'];
-		$link_href = $link['href'];
-
-
-		if ($this->multiAuthPlugin->config['internal']['authMode'] == 'lazy') {
-			// we can come back to MW
-			$local_href = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeLocalURL();
-		}
-		else {
-			// we won't be able to come back to MW because of access restrictions
-			$local_href = isset($this->multiAuthPlugin->config['internal']['strictLogoutTarget'])?
-			$this->multiAuthPlugin->config['internal']['strictLogoutTarget']:'';
-		}
-
-		// build the logout url
-		if (strstr($link_href, '{RETURN_URL}')) {
-			$return_url = $local_href;
-			if (strstr($return_url, '{RETURN_URL}') && isset($_REQUEST['returnto'])) {
-				$return_url = str_replace('{RETURN_URL}', $_REQUEST['returnto'], $return_url);
-			}
-			$link_href = str_replace('{RETURN_URL}', wfUrlencode($return_url), $link_href);
-		}
-
-			
+		$currentMethodName = $this->multiAuthPlugin->getCurrentMethodName();
+		$libName = $this->multiAuthPlugin->getCurrentAuthLib();
+		
 		// first: local
 		$success = $this->multiAuthPlugin->logout();
 		if ($success) {
 			// finish off the local logout
 			wfRunHooks('UserLogoutComplete', array(&$wgUser, &$injectedHtml, $oldName));
 
+			$return_url = $this->buildReturnURL($currentMethodName);
+			
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "authLib = {$libName}");
 			// second: external
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Initiating external logout process (".$link_href.").");
-			header("Location: " . $link_href);
-			exit(); // no execution past here!
+			switch ($libName) {
+				case 'simplesamlphp':
+					$ssphpPath = $this->multiAuthPlugin->config['paths']['libs']['simplesamlphp'];
+					require_once($ssphpPath . "/lib/_autoload.php");
+					
+					$as = new SimpleSAML_Auth_Simple($currentMethod['auth']['spentityid']);
+				
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Redirecting to SLO logout process: [SimpleSamlPHP] ReturnTo = {$return_url}");
+					$as->logout(array('ReturnTo' => $return_url));
+					exit(); // no execution past here!
+				break;
+				
+				default:
+					// prepare data
+					
+					$link = $currentMethod['logout'];
+					$link_text = $link['text'];
+					$link_href = $link['href'];
+					
+					// build the logout url
+					if (strstr($link_href, '{RETURN_URL}')) {
+						$link_href = str_replace('{RETURN_URL}', wfUrlencode($return_url), $link_href);
+					}
+					
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Redirecting to SLO login process: [URL] {$link_href}");
+					header("Location: " . $target);
+					exit;
+				break;
+			}
 		}
 		else {
 			$html .= "<p>" . wfMsg('multiauthspeciallogout-msg_logoutFailure') . "</p>\n";
@@ -183,6 +189,28 @@ class MultiAuthSpecialLogout extends SpecialPage {
 		}
 	}
 
+	
+	private function buildReturnURL($methodName) {
+		if (!$this->multiAuthPlugin->getCurrentAuthLib() == 'shibboleth' ||
+				!isset($currentMethod['auth']['mode']) ||
+				$currentMethod['auth']['mode'] == 'lazy')
+		{
+			// we can come back to MW
+			$local_href = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeFullURL();
+		}
+		else {
+			// we won't be able to come back to MW because of access restrictions
+			$local_href = isset($currentMethod['auth']['strictLogoutTarget'])?
+			$currentMethod['auth']['strictLogoutTarget']:'';
+		}
+		$return_url = $local_href;
+		if (strstr($return_url, '{RETURN_URL}') && isset($_REQUEST['returnto'])) {
+			$return_url = str_replace('{RETURN_URL}', $_REQUEST['returnto'], $return_url);
+		}
+		
+		return $return_url;
+	}
+	
 }
 
 ?>

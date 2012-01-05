@@ -70,16 +70,7 @@ $config['paths'] = array(
 $config['internal'] = array(
 
 	/*
-	 * The authentication library to use for external authentication.
-	 * 
-	 * NOTE: Currently supported libraries are 'shibboleth' (needs running 
-	 * shibd) and 'simplesamlphp' (needs simplesamlphp installed).
-	 */
-	//'authLib' => 'shibboleth',
-	'authLib' => 'simplesamlphp',
-
-	/*
-	 * In this step authentication data from is acquired and made available in 
+	 * In this step authentication data from the SP is acquired and made available in 
 	 * the global namespace as an associative array called "authData", so that 
 	 * the methodSetupFile can access it.
 	 * The data will be read using the authLib specified above.
@@ -89,24 +80,6 @@ $config['internal'] = array(
 	 */
 	'authData' => array('uid', 'givenName', 'sn', 'cn', 'mail', 'eduPersonPrincipalName'),
 
-
-	/*
-	 * Lazy authentication leaves MW with complete control over who gets access
-	 * to specific pages.
-	 * 
-	 * Strict authentication leaves a higher level authority (e.g. Shibboleth)
-	 * with complete control who gets access to the MW files. One drawback of
-	 * this constellation is that after logging out there is no access to MW's
-	 * logout-success page. Therefore an external logout-success page has to be
-	 * specified using the strictLogoutTarget function.
-	 * 
-	 * DEFAULT:
-	 * 	'authMode' => 'lazy',
-	 *	'strictLogoutTarget' => 'https://www.sso.uni-erlangen.de/logout.html',
-	 * 
-	 */
-	'authMode' => 'lazy',
-	'strictLogoutTarget' => 'https://www.sso.uni-erlangen.de/logout.html',
 
 	/*
 	 * Does a redirect to the specified URL after the logout process is
@@ -177,7 +150,8 @@ $config['internal'] = array(
 	'methods' => array(
 		'local',
 		//'shibboleth-default',
-
+		'simplesamlphp-default',
+			
 		/*
 		 * SAMPLES
 		 * This should be commented out in production!
@@ -186,7 +160,7 @@ $config['internal'] = array(
 //		'sample-shibboleth-default',
 //		'sample-shibboleth-restricted',
 //		'sample-shibboleth-someApp',
-		'sample-simplesamlphp-default',
+//		'sample-simplesamlphp-default',
 //		'sample-simplesamlphp-someIdP',
 
 	),

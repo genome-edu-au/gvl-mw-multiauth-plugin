@@ -59,21 +59,21 @@ function multiAuthLoginSetup() {
 	if ( function_exists( 'wfLoadExtensionMessages' ) )
 		wfLoadExtensionMessages('MultiAuthSpecialLogin'); // pre 1.18.0
 
-	if (MwFunctions::testVersionGEq(1,18))
-		MwFunctions::updateMessageCache(); // Hack for post 1.18.0
+// 	if (MwFunctions::testVersionGEq(1,18))
+// 		MwFunctions::updateMessageCache(); // Hack for post 1.18.0
 	
 	
 	// aliases
 	if (!MwFunctions::testVersionGEq(1,18))
 		$wgExtensionAliasesFiles['MultiAuthSpecialLogin'] = dirname(__FILE__) . '/SpecialLogin.alias.php';
 
-	$wgExtensionCredits['specialpage'][] = array(
+	$wgExtensionCredits['specialpage']['MultiAuthSpecialLogin'] = array(
+// 			'name' 			=> wfMsg('multiauthspeciallogin-credits_name'),
+// 			'author' 		=> wfMsg('multiauthspeciallogin-credits_author'),
+// 			'description' 	=> wfMsg('multiauthspeciallogin-credits_description'),
 			'path' 			=> __FILE__,
-			'name' 			=> wfMsg('multiauthspeciallogin-credits_name'),
 			'version'		=> $wgMultiAuthPlugin->getVersion(),
-			'author' 		=> wfMsg('multiauthspeciallogin-credits_author'),
 			'url' 			=> $wgMultiAuthPlugin->getURL(),
-			'description' 	=> wfMsg('multiauthspeciallogin-credits_description')
 	);
 }
 

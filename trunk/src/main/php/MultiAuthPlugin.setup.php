@@ -67,6 +67,12 @@ function multiAuthSetup() {
 	require_once("special/login/SpecialLogin.setup.php");
 	require_once('special/logout/SpecialLogout.setup.php');
 	
+	// register deferred setup function
+	// ORDER IS IMPORTANT: 
+	// This should be executed after the setup functions of the special pages!
+	global $wgExtensionFunctions;
+	$wgExtensionFunctions[] = 'deferredMultiAuthSetup';
+	
 	// replace standard AuthPlugin with the MultiAuthPlugin
 	global $wgAuth;
 	$wgMultiAuthPlugin->old_wgAuth = $wgAuth;
@@ -171,22 +177,24 @@ function deferredMultiAuthSetup() {
 	);
 
 	
+	// Hack to reduce the updateMessageCache() calls to 1
+	// TODO cleanly implement localisation!
 	
-
-	// reset the aliases cache to ensure all recently and subsequently added
-	// page aliases are recognized despite the fact that the MA extension
-	// already uses URL building functions
-	// TODO File bug report that the cache needs a dirty flag!
-//  	global $wgContLang;
-//  	if (isset($wgContLang->mExtendedSpecialPageAliases))
-//  	unset($wgContLang->mExtendedSpecialPageAliases);
-
+	$wgExtensionCredits['specialpage']['MultiAuthSpecialLogin'] = array_merge($wgExtensionCredits['specialpage']['MultiAuthSpecialLogin'], array(
+			'name' 			=> wfMsg('multiauthspeciallogin-credits_name'),
+			'author' 		=> wfMsg('multiauthspeciallogin-credits_author'),
+			'description' 	=> wfMsg('multiauthspeciallogin-credits_description'),
+	));
+	
+	$wgExtensionCredits['specialpage']['MultiAuthSpecialLogout'] = array_merge($wgExtensionCredits['specialpage']['MultiAuthSpecialLogout'], array(
+			'name' 			=> wfMsg('multiauthspeciallogout-credits_name'),
+			'author' 		=> wfMsg('multiauthspeciallogout-credits_author'),
+			'description' 	=> wfMsg('multiauthspeciallogout-credits_description'),
+	));
 
 	return true;
 }
-// register deferred setup functionn
-global $wgExtensionFunctions;
-$wgExtensionFunctions[] = 'deferredMultiAuthSetup';
+
 
 
 ?>

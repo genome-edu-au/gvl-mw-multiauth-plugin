@@ -50,9 +50,9 @@ if (!MwFunctions::isAsyncLoadRequest()) {
 	
 	//$wgDebugLogFile = "debug.log";  // activate MW's logging mechanism
 	//print_r($GLOBALS);
-	$wgShowExceptionDetails = true; 
+	//$wgShowExceptionDetails = true; 
 	//error_reporting (E_ALL); ini_set("display_errors", 1); 
-	echo "<!--"; print_r($_SERVER); print_r($_COOKIE); print_r($_REQUEST); print_r($_SESSION); echo "--> <b>DEBUGGING ENABLED</b>";
+	//echo "<!--"; print_r($_SERVER); print_r($_COOKIE); print_r($_REQUEST); (isset($_SESSION)?print_r($_SESSION):''); echo "--> <b>DEBUGGING ENABLED</b>";
 	
 	
 	// MAKE SURE THIS IS COMMENTED OUT IN PRODUCTION !!!

@@ -94,10 +94,14 @@ class MultiAuthPlugin extends AuthPlugin {
 		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "\n=================================================================================================="); /// seperator
 		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "*** I'm alive!");
 
+		
 		if ($this->config['debug']['logServerVariables']) {
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "*** SERVER: " . print_r($_SERVER, true));
 		}
 
+		$sessionName = session_name();
+		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Detected MW session name: {$sessionName}");
+		
 		// start the whole thing up...
 		$this->config = array();
 		$this->loadConfig();
@@ -170,6 +174,50 @@ class MultiAuthPlugin extends AuthPlugin {
 	private function updateConfiguredMethods() {
 		unset($this->config['methods']);
 		$this->loadConfig($this->config['internal']['methodSetupFile']);
+		
+		if (!isset($this->config['methods']))
+			$this->config['methods'] = array();
+		
+		// hardcoded authentication methods 
+		$config['methods'] = array(
+			'local' => array(
+					'login' => array(
+							'text' => 'Login (local)',
+							'href' => SpecialPage::getTitleFor('Userlogin')->escapeFullURL() . '?returnto={RETURN_URL}',
+					),
+			
+					'logout' => array(
+							'text' => 'Logout (local)',
+							'href' => SpecialPage::getTitleFor('Userlogout')->escapeFullURL() . '?returnto={RETURN_URL}',
+					),
+			
+					'attributes' => array(),
+			
+			),
+		);
+		$this->config['methods'] = array_merge($config['methods'],$this->config['methods']);
+		
+		// set defaults for missing options
+		foreach ($this->config['methods'] as $methodName => &$method) {
+			if (!isset($method['auth'])) {
+				$method['auth'] = array('lib' => 'none');
+				continue;
+			}
+			
+			switch ($method['auth']['lib']) {
+				case 'simplesamlphp';
+					if (!array_key_exists('spentityid', $method['auth']))
+						$method['auth']['spentityid'] = 'default-sp';
+				break;
+				
+				case 'shibboleth';
+					if (!array_key_exists('mode', $method['auth']))
+						$method['auth']['mode'] = 'lazy';
+				break;
+				
+			}
+		}
+		
 	}
 
 
@@ -182,9 +230,13 @@ class MultiAuthPlugin extends AuthPlugin {
 		global $authData;
 		$authData = array();
 
-		$libName = $this->config['internal']['authLib'];
+		$method = $this->getCurrentMethod();
+		$methodName = $this->getCurrentMethodName();
+		$libName = $this->getCurrentAuthLib();
 		$attributes = $this->config['internal']['authData'];
 
+		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Start retrieval of auth data for method '{$methodName}'");
+		
 		$skipped = false;
 		switch ($libName) {
 
@@ -211,36 +263,17 @@ class MultiAuthPlugin extends AuthPlugin {
 			case 'simplesamlphp':
 				$ssphpPath = $this->config['paths']['libs']['simplesamlphp'];
 
-				/*
-				require_once($ssphpPath . '/lib/_autoload.php');
-				$as = new SimpleSAML_Auth_Simple('localhost-sp');
-				$attributes = $as->getAttributes();
-				wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . print_r($attributes,true));
-				*/
-				
-				// TODO put this somewhere else
-				// switch to simpleSAMLphp session
-				if (session_id()) {
-					$oldSessionName = session_name();
-					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Closing existing session '{$oldSessionName}' for simpleSAMLphp.");
-					session_write_close();
-				}
-				//session_name("simpleSAMLphp");
-				//session_start();
-				//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "SESSION:\n" . print_r($_SESSION, true) . "\n");
-
-
-				if (file_exists($ssphpPath . "/www/_include.php")) {
+				if (file_exists($ssphpPath . "/lib/_autoload.php")) {
 					// load simpleSAMLphp library
-					require_once($ssphpPath . "/www/_include.php");
+					require_once($ssphpPath . "/lib/_autoload.php");
 
 					// Load simpleSAMLphp configuration and session.
 					$config = SimpleSAML_Configuration::getInstance();
 					$session = SimpleSAML_Session::getInstance();
-					//wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "SAML-SESSION:\n" . print_r($session, true) . "\n");
+// 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "SAML-SESSION:\n" . print_r($session, true) . "\n");
 						
 					$ssphpAttrs = array();
-					if ($session->isValid('saml2')) {
+					if ($session->isValid($method['auth']['spentityid'])) {
 						// retrieve attributes
 						$ssphpAttrs = $session->getAttributes();
 						if ($this->config['debug']['logRawAuthLibAttibuteData']) {
@@ -252,8 +285,8 @@ class MultiAuthPlugin extends AuthPlugin {
 					}
 
 					foreach ($attributes as $attribute) {
-						if (isset($ssphpAttrs["urn:mace:dir:attribute-def:" . $attribute][0])) {
-							$authData[$attribute] = $ssphpAttrs["urn:mace:dir:attribute-def:" . $attribute][0];
+						if (isset($ssphpAttrs[$attribute][0])) {
+							$authData[$attribute] = $ssphpAttrs[$attribute][0]; // TODO retrieve all values!
 						}
 						else {
 							$authData[$attribute] = '';
@@ -262,17 +295,6 @@ class MultiAuthPlugin extends AuthPlugin {
 				}
 				else {
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Could not load SimpleSAMLphp lib from '{$ssphpPath}'.");
-				}
-
-
-				// TODO put this somewhere else
-				// switch back to old session
-				session_write_close();
-				if (isset($oldSessionName)) {
-					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Restoring previous session '{$oldSessionName}'.");
-					session_write_close();
-					session_name($oldSessionName);
-					session_start();
 				}
 
 
@@ -331,7 +353,17 @@ class MultiAuthPlugin extends AuthPlugin {
 	function getCurrentMethod() {
 		return $this->config['methods'][$this->currentMethodName];
 	}
-
+	
+	/**
+	 * Returns the name of the configured authentication library for
+	 * the currently active authentication method.
+	 * @return string
+	 * The name of the currently active authentication library
+	 */
+	function getCurrentAuthLib() {
+		return $this->currentMethodName?$this->config['methods'][$this->currentMethodName]['auth']['lib']:'';
+	}
+	
 	/**
 	 * Returns an array containing only all the currently activated
 	 * authentication methods.
@@ -375,6 +407,18 @@ class MultiAuthPlugin extends AuthPlugin {
 		}
 	}
 
+	/**
+	 * Returns the name of the configured authentication library for
+	 * the requested method name.
+	 * @param string $methodName
+	 * Name of the method you want to get the configured auth lib for
+	 * @return string
+	 * The name of the method's authentication library
+	 */
+	function getAuthLib($methodName) {
+		return $this->config['methods'][$methodName]['auth']['lib'];
+	}
+	
 	/**
 	 * If the given method name is configured true is returned,
 	 * false otherwise
@@ -487,7 +531,6 @@ class MultiAuthPlugin extends AuthPlugin {
 				// log the user in
 				$user = User::newFromName($username);
 				$user->load();
-				$user->setupSession();
 
 				if ($user->isLoggedIn()) {
 					$user->setCookies();
@@ -790,6 +833,13 @@ class MultiAuthPlugin extends AuthPlugin {
 		if ( is_int($t_pos) ) {
 			$t_pos += strlen('returnto=');
 			$returnto = substr($t_href, $t_pos);
+			 
+			if (strstr(strtolower($returnto),'login') 
+				|| strstr(strtolower($returnto),'logout')) {
+// 				$returnto = SpecialPage::getTitleFor('Main_Page')->getPartialURL();
+				return '';
+			}
+			
 			return $returnto;
 		}
 		else {
@@ -863,7 +913,13 @@ class MultiAuthPlugin extends AuthPlugin {
 		unset($personal_urls['logout']);
 
 		// Build link to the login/logout special pages of the MultiAuthPlugin
-		$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . "?returnto=" . $returnto;
+		if ($returnto == '') {
+			$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL();
+		}
+		else {
+			$loginLink = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . "?returnto=" . $returnto;
+		}
+		
 		$logoutLink = SpecialPage::getTitleFor('MultiAuthSpecialLogout')->escapeFullURL();
 
 		if (!$this->isLoggedIn()) {

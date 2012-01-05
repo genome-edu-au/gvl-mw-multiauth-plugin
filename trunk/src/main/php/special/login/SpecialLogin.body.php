@@ -121,44 +121,35 @@ class MultiAuthSpecialLogin extends SpecialPage {
 			// save selected method name
 			$_SESSION['MA_methodName'] = $methodName;
 			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "SESSION['MA_methodName'] = {$methodName}");
-			
-			
-			
-			if ($methodName == 'local') {
-				$return_url = (isset($_REQUEST['returnto']))?$_REQUEST['returnto']:'';
+
+			$libName = $this->multiAuthPlugin->getAuthLib($methodName);
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Method auth settings: " . print_r($method['auth'], true));
+			switch ($libName) {
+				case 'simplesamlphp':
+					// init the external login
+					$ssphpPath = $this->multiAuthPlugin->config['paths']['libs']['simplesamlphp'];
+					require_once($ssphpPath . "/lib/_autoload.php");
+					
+					$as = new SimpleSAML_Auth_Simple($method['auth']['spentityid']);
+
+					$return_url = $this->buildReturnURL($methodName);
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Redirecting to SSO login process: [SimpleSamlPHP] ReturnTo = {$return_url}");
+					if (isset($method['auth']['idpentityid'])) {
+						$as->login(array('ReturnTo' => $return_url, 'saml:idp' => $method['auth']['idpentityid']));
+					}
+					else {
+						$as->login(array('ReturnTo' => $return_url));
+					}
+					exit;
+				break;
+
+				default:
+					$target = $this->buildLink($methodName);
+					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Redirecting to SSO login process: [URL] {$target}");
+					header("Location: " . $target);
+					exit;
+				break;
 			}
-			else {
-				$returnto = (isset($_REQUEST['returnto']))?'?returnto='.$_REQUEST['returnto']:'';
-				$return_url = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL(). $returnto;
-			}
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "returnTo = " . $return_url);
-			
-			// init the external login
-			$ssphpPath = $this->multiAuthPlugin->config['paths']['libs']['simplesamlphp'];
-			require_once($ssphpPath . '/lib/_autoload.php');
-			
-			$as = new SimpleSAML_Auth_Simple('localhost-sp');
-			$as->requireAuth();
-			
-			$attributes = $as->getAttributes();
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . print_r($attributes,true));
-			
-			
-			/*
-			
-			
-			$ssphpPath = $this->multiAuthPlugin->config['paths']['libs']['simplesamlphp'];
-			require_once($ssphpPath . '/lib/_autoload.php');
-			SimpleSAML_Auth_Default::initLogin('localhost-sp', $return_url);
-			*/
-			
-			
-			/*
-			$target = $this->buildLink($methodName);
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "Redirecting to SSO login process: {$target}");
-			header("Location: " . $target);
-			exit;
-			*/
 		}
 	}
 
@@ -197,7 +188,13 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		foreach ($activatedMethods as $methodName => $method) {
 			$link = $method['login'];
 			$link_text = $link['text'];
-			$link_href = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . '?returnto=' . $_REQUEST['returnto']. '&method=' . $methodName;
+			
+			if (isset($_REQUEST['returnto'])) {
+				$link_href = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . '?returnto=' . $_REQUEST['returnto']. '&method=' . $methodName;
+			}
+			else {
+				$link_href = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . '?method=' . $methodName;
+			}
 				
 			// configure the link
 			$this->linkList['MA_' . $methodName . '_Login'] = array(
@@ -207,6 +204,22 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		}
 	}
 
+	
+	private function buildReturnURL($methodName) {
+		if ($methodName == 'local') {
+			$return_url = (isset($_REQUEST['returnto']))?$_REQUEST['returnto']:'';
+		}
+		else {
+			$returnto = (isset($_REQUEST['returnto']))?'?returnto='.$_REQUEST['returnto']:'';
+			$return_url = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL() . $returnto;
+		}
+		
+		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': '  . ': ' . "returnTo = " . $return_url);
+		
+		return $return_url;
+	}
+	
+	
 	/**
 	 * Builds a proper login link for the given method object.
 	 *
@@ -221,14 +234,7 @@ class MultiAuthSpecialLogin extends SpecialPage {
 		$link_href = $link['href'];
 
 		if (strstr($link_href, '{RETURN_URL}')) {
-			if ($methodName == 'local') {
-				$return_url = (isset($_REQUEST['returnto']))?$_REQUEST['returnto']:'';
-			}
-			else {
-				$returnto = (isset($_REQUEST['returnto']))?'?returnto='.$_REQUEST['returnto']:'';
-				$return_url = SpecialPage::getTitleFor('MultiAuthSpecialLogin')->escapeFullURL(). $returnto;
-			}
-
+			$return_url = $this->buildReturnURL($methodName);
 			$link_href = str_replace('{RETURN_URL}', wfUrlencode($return_url), $link_href);
 		}
 		return $link_href;

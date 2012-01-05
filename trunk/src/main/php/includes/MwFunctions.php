@@ -42,11 +42,12 @@ class MwFunctions {
 		if (MwFunctions::isAsyncLoadRequest())
 			return false; // skip subsequent calls to load stuff
 		
-		error_log("UPDATE");
 		global $wgLang;
 		$langCode = $wgLang->getCode();
 		wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Detected lang: {$langCode}");
+		
 		Language::getLocalisationCache()->recache($langCode); // hack for post 1.18.0
+		
 		return true;
 	}
 	
@@ -61,7 +62,7 @@ class MwFunctions {
 			$minor = intval($parts[1]);
 			$patch = intval($parts[2]);
 
-			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Detected MW: major {$major}, minor {$minor}, patch {$patch}");
+			wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Detected MW version: major {$major}, minor {$minor}, patch {$patch}");
 
 
 
