@@ -96,15 +96,16 @@ class MwFunctions {
 	static function testVersionGEq($major, $minor = null, $patch = null) {
 		$version = self::getVersionParts();
 	
-		if ($major < $version['major'])
+		if ($version['major'] < $major)
 			return false;
 	
-		if (!is_null($minor) && $minor < $version['minor'])
+		if (!is_null($minor) && $version['minor'] < $minor)
 			return false;
 				
-		if (!is_null($patch) && $patch < $version['patch'])
+		if (!is_null($patch) && $version['patch'] < $patch)
 			return false;
-				
+		
+		/* wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "test (".$version['major'].",".$version['minor'].",".$version['patch'].") >= ($major,$minor,$patch) == true"); */
 		return true;
 	}
 	
