@@ -1,0 +1,68 @@
+<document>
+	<properties>
+		<author email="florian.loeffler@rrze.uni-erlangen.de">
+			IDMone Team
+		</author>
+		<title>Introduction</title>
+	</properties>
+	<body>
+	
+	<section name="Introduction">
+			<p>
+				At the Regional Computing Centre Erlangen (RRZE) we use the popular MediaWiki
+				software (http://www.mediawiki.org/) in many projects for documentation and
+				publication purposes.
+			</p>
+
+			<p>
+				With the development of a Single Sign On infrastructure based on SimpleSAMLphp
+				and Shibboleth we needed to make MediaWiki SSO capable in a flexible and easily
+				configurable way. We are aware that there are already extensions out there
+				providing simple SSO capabilities, but we wanted more.
+			</p>
+
+			<p>
+				So we started developing the MediaWiki MultiAuthPlugin with the goal to provide
+				a single plugin to manage all possible authentication scenarios with one
+				single extension -- for example local authentication via original 
+				MediaWiki login dialog (as fallback), SSO via Shibboleth, SSO via
+				SimpleSAMLphp, and so on.
+			</p>
+		</section>
+
+		<section name="Description">
+			<p>
+				The Mediawiki <em>MultiAuth Plugin</em> provides an easily
+				configurable way to manage multiple authentication scenarios with
+				Mediawiki. This especially includes SSO via Shibboleth and/or
+				SimpleSAMLphp.
+			</p>
+			<p>
+				The Mediawiki <em>MultiAuth Plugin</em>
+				was developed using Mediawiki 1.18.0 and SimpleSamlPHP 1.8.0 
+			</p>
+			<p>
+				The Mediawiki <em>MultiAuth Plugin</em>
+				allows you to
+				<ul> 
+					<li>use local MW authentication in parallel with external authentication</li>
+					<li>completely forbid local authentication - if desired</li>
+					<li>configure an external authentication library for SSO
+						Currently one of {Shibboleth, SimpleSAMLphp} or both is possible</li>
+					<li>auto-create local user accounts if authenticated externally</li>
+					<li>auto-update changed user preferences in local user accounts if 
+						authenticated externally</li>
+					<li>send e-mail notification about auto-created users to a configurable e-mail 
+						address</li>
+				</ul>
+			</p>
+			<p>
+				If you make the log/ directory writeable the extension also provides a 
+				debug.log file to help you identify possible errors.
+			</p>
+		</section>
+
+		
+
+	</body>
+</document>
