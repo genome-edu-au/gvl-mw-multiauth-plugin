@@ -56,7 +56,7 @@ function multiAuthLoginSetup() {
 
 	// localization
 	$wgExtensionMessagesFiles['MultiAuthSpecialLogin'] = dirname(__FILE__) . '/SpecialLogin.i18n.php';
-	if ( function_exists( 'wfLoadExtensionMessages' ) )
+	if ( function_exists( 'wfLoadExtensionMessages' ) && !MwFunctions::testVersionGEq(1,18))
 		wfLoadExtensionMessages('MultiAuthSpecialLogin'); // pre 1.18.0
 
 // 	if (MwFunctions::testVersionGEq(1,18))

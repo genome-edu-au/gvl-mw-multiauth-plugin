@@ -63,7 +63,7 @@ function multiAuthLogoutSetup() {
 	// localization
 	$wgExtensionMessagesFiles['MultiAuthSpecialLogout'] =  dirname(__FILE__). '/SpecialLogout.i18n.php';
 	
-	if ( function_exists( 'wfLoadExtensionMessages' ) )
+	if ( function_exists( 'wfLoadExtensionMessages' ) && !MwFunctions::testVersionGEq(1,18) )
 		wfLoadExtensionMessages('MultiAuthSpecialLogout'); // pre 1.18.0
 
 // 	if (MwFunctions::testVersionGEq(1,18))
