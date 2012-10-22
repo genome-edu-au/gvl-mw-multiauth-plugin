@@ -182,7 +182,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		$config['methods'] = array(
 			'local' => array(
 					'login' => array(
-							'text' => 'Login (local)',
+							'text' => 'Local Login/create account: with an account name and password you choose yourself',
 							'href' => SpecialPage::getTitleFor('Userlogin')->escapeFullURL() . '?returnto={RETURN_URL}',
 					),
 			

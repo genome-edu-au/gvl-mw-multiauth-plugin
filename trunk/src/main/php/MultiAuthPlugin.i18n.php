@@ -45,7 +45,7 @@ $messages['en'] = array(
 	'multiauth-credits_name' => 'MultiAuth Plugin',
 	'multiauth-credits_author' => 'Regional Computing Centre Erlangen (RRZE), Florian Löffler',
 	'multiauth-credits_description' => 'Highly configurable authentication plugin',
-	'multiauth-special_login_link' => 'Login',
+	'multiauth-special_login_link' => 'Login / create account to edit pages',
 	'multiauth-special_logout_link' => 'Logout',
 );
 
