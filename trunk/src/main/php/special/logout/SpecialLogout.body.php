@@ -178,7 +178,7 @@ class MultiAuthSpecialLogout extends SpecialPage {
 					}
 					
 					wfDebugLog('MultiAuthPlugin', __METHOD__ . ': ' . "Redirecting to SLO login process: [URL] {$link_href}");
-					header("Location: " . $target);
+					header("Location: " . $link_href);
 					exit;
 				break;
 			}
