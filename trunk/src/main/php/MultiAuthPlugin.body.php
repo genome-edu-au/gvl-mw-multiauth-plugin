@@ -195,7 +195,8 @@ class MultiAuthPlugin extends AuthPlugin {
 			
 			),
 		);
-		$this->config['methods'] = array_merge($config['methods'],$this->config['methods']);
+		/* $this->config['methods'] = array_merge($config['methods'],$this->config['methods']); */
+		$this->config['methods'] = array_merge($this->config['methods'], $config['methods']);
 		
 		// set defaults for missing options
 		foreach ($this->config['methods'] as $methodName => &$method) {
