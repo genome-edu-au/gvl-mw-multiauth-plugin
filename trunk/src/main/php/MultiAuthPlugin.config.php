@@ -58,7 +58,7 @@ $config['paths'] = array(
 	 */
 	'libs' => array(
 		//'simplesamlphp' => '/var/simplesamlphp',
-		'simplesamlphp' => '/home/unrza249/opt/simplesamlphp-1.8.0',
+		//'simplesamlphp' => '/home/unrza249/opt/simplesamlphp-1.8.0',
 	),
 
 );
@@ -78,7 +78,8 @@ $config['internal'] = array(
 	 * IMPORTANT: All attributes that could not be retrieved are set with an 
 	 * empty string value.
 	 */
-	'authData' => array('uid', 'givenName', 'sn', 'cn', 'mail', 'eduPersonPrincipalName'),
+	/* 'authData' => array('uid', 'givenName', 'sn', 'cn', 'mail', 'eduPersonPrincipalName'), */
+	'authData' => array('auEduPersonSharedToken', 'displayName', 'mail', 'o', 'homeOrganization', 'unscoped-affiliation', 'homeOrganizationType'),
 
 
 	/*
@@ -149,8 +150,9 @@ $config['internal'] = array(
 	 */
 	'methods' => array(
 		'local',
-		//'shibboleth-default',
-		'simplesamlphp-default',
+		'shibboleth-anon',
+		'shibboleth-email',
+		//'simplesamlphp-default',
 			
 		/*
 		 * SAMPLES
@@ -191,8 +193,8 @@ $config['comm'] = array(
 	 	 * 	'notifyMailTo' => '',
 	 	 */
 		'notifyMail' => true,
-		'notifyMailTo' => 'florian.loeffler@rrze.uni-erlangen.de',
-		'notifyMailFrom' => 'noreply@ma-mailer',
+		'notifyMailTo' => 'mike@genome.edu.au',
+		'notifyMailFrom' => 'noreply@genome.edu.au',
 
 
 		/*

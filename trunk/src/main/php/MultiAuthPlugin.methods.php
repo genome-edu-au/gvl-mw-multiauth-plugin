@@ -56,31 +56,68 @@ $config['methods'] = array(
 	 * 	'local' method is hardcoded and does not need to be configured!
 	 */	
 	
-	'shibboleth-default' => array(
+	'shibboleth-anon' => array(
 		'auth' => array(
 				'lib' => 'shibboleth',
 				//'mode' => 'lazy', // This is the default
 				),
 			
 		'login' => array(
-			'text' => 'Login (SSO)',
+			'text' => 'GVL Login (AAF): automatically creates account with your public username being anonymous (randomized)',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login?target={RETURN_URL}',
 		),
 	
 		'logout' => array(
-			'text' => 'Logout (SLO)',
+			'text' => 'Logout (AAF)',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
 		),
 		
 		'attributes' => array(
-			'username'	=> ucfirst($authData['uid']),
-			'fullname'	=> $authData['cn'],
+			'username'	=> 'X'.$authData['auEduPersonSharedToken'],
+			'fullname'	=> $authData['displayName'],
 			'email'		=> $authData['mail'],
+			'o'             => $authData['o'],
+			'auEduPersonSharedToken' => $authData['auEduPersonSharedToken'],
+			'homeOrganization' => $authData['homeOrganization'],
 		),
 
 		'requirements' => array(
 			//'username' => '*',  	// this is always implied (hardcoded!)
 			'email' => '*', 		// email is mandatory, but any value will be accepted 
+			//'homeOrganization'     => 'uq.edu.au',
+		),
+				
+	),
+
+	'shibboleth-email' => array(
+		'auth' => array(
+				'lib' => 'shibboleth',
+				//'mode' => 'lazy', // This is the default
+				),
+			
+		'login' => array(
+			'text' => 'GVL Login (AAF): automatically creates account with your public username being your email address',
+			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login?target={RETURN_URL}',
+		),
+	
+		'logout' => array(
+			'text' => 'Logout (AAF)',
+			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
+		),
+		
+		'attributes' => array(
+			'username'	=> ucfirst($authData['mail']),
+			'fullname'	=> $authData['displayName'],
+			'email'		=> $authData['mail'],
+			'o'             => $authData['o'],
+			'auEduPersonSharedToken' => $authData['auEduPersonSharedToken'],
+			'homeOrganization' => $authData['homeOrganization'],
+		),
+
+		'requirements' => array(
+			//'username' => '*',  	// this is always implied (hardcoded!)
+			'email' => '*', 		// email is mandatory, but any value will be accepted 
+			//'homeOrganization'     => 'uq.edu.au',
 		),
 				
 	),
@@ -100,11 +137,11 @@ $config['methods'] = array(
 				'text' => 'Logout (SLO)',
 			),
 	
-			'attributes' => array(
-				'username'	=> ucfirst($authData['uid']),
-				'fullname'	=> $authData['cn'],
-				'email'	=> $authData['mail'],
-			),
+			/* 'attributes' => array( */
+			/* 	'username'	=> ucfirst($authData['uid']), */
+			/* 	'fullname'	=> $authData['cn'], */
+			/* 	'email'	=> $authData['mail'], */
+			/* ), */
 			
 			'requirements' => array(
 				//'username' => '*',  	// this is always implied (hardcoded!)
@@ -139,11 +176,11 @@ $config['methods'] = array(
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
 		),
 		
-		'attributes' => array(
-			'username'	=> ucfirst($authData['uid']),
-			'fullname'	=> $authData['cn'],
-			'email'	=> $authData['mail'],
-		),
+		/* 'attributes' => array( */
+		/* 	'username'	=> ucfirst($authData['uid']), */
+		/* 	'fullname'	=> $authData['cn'], */
+		/* 	'email'	=> $authData['mail'], */
+		/* ), */
 		
 	),
 	
@@ -169,11 +206,11 @@ $config['methods'] = array(
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
 		),
 		
-		'attributes' => array(
-			'username'	=> ucfirst($authData['uid']),
-			'fullname'	=> $authData['cn'],
-			'email'	=> $authData['mail'],
-		),
+		/* 'attributes' => array( */
+		/* 	'username'	=> ucfirst($authData['uid']), */
+		/* 	'fullname'	=> $authData['cn'], */
+		/* 	'email'	=> $authData['mail'], */
+		/* ), */
 		
 		'requirements' => array(
 			//'username' => '*',  // this is always implied (hardcoded!)
@@ -206,11 +243,11 @@ $config['methods'] = array(
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
 		),
 
-		'attributes' => array(
-			'username'	=> ucfirst($authData['uid']),
-			'fullname'	=> $authData['cn'],
-			'email'	=> $authData['mail'],
-		),
+		/* 'attributes' => array( */
+		/* 	'username'	=> ucfirst($authData['uid']), */
+		/* 	'fullname'	=> $authData['cn'], */
+		/* 	'email'	=> $authData['mail'], */
+		/* ), */
 	),
 
     /*
@@ -243,11 +280,11 @@ $config['methods'] = array(
 					'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Logout?return={RETURN_URL}',
 			),
 	
-			'attributes' => array(
-					'username'	=> ucfirst($authData['uid']),
-					'fullname'	=> $authData['cn'],
-					'email'	=> $authData['mail'],
-			),
+			/* 'attributes' => array( */
+			/* 		'username'	=> ucfirst($authData['uid']), */
+			/* 		'fullname'	=> $authData['cn'], */
+			/* 		'email'	=> $authData['mail'], */
+			/* ), */
 	),
 	
 		
@@ -275,11 +312,11 @@ $config['methods'] = array(
 					'text' => 'Logout (SLO)',
 			),
 	
-			'attributes' => array(
-					'username'	=> ucfirst($authData['uid']),
-					'fullname'	=> $authData['cn'],
-					'email'	=> $authData['mail'],
-			),
+			/* 'attributes' => array( */
+			/* 		'username'	=> ucfirst($authData['uid']), */
+			/* 		'fullname'	=> $authData['cn'], */
+			/* 		'email'	=> $authData['mail'], */
+			/* ), */
 	),
 	
 	/*
@@ -307,11 +344,11 @@ $config['methods'] = array(
 					'text' => 'Logout (SLO)',
 			),
 	
-			'attributes' => array(
-					'username'	=> ucfirst($authData['uid']),
-					'fullname'	=> $authData['cn'],
-					'email'	=> $authData['mail'],
-			),
+			/* 'attributes' => array( */
+			/* 		'username'	=> ucfirst($authData['uid']), */
+			/* 		'fullname'	=> $authData['cn'], */
+			/* 		'email'	=> $authData['mail'], */
+			/* ), */
 	
 			'requirements' => array(
 				//'username' => '*',  	// this is always implied (hardcoded!)
