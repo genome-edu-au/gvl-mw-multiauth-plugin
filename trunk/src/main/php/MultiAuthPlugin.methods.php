@@ -73,12 +73,13 @@ $config['methods'] = array(
 		),
 		
 		'attributes' => array(
-			'username'	=> 'X'.$authData['auEduPersonSharedToken'],
-			'fullname'	=> $authData['displayName'],
-			'email'		=> $authData['mail'],
-			'o'             => $authData['o'],
-			'auEduPersonSharedToken' => $authData['auEduPersonSharedToken'],
-			'homeOrganization' => $authData['homeOrganization'],
+				      # SharedToken can have '_' chars; mediawiki automatically changes '_' in username to ' ' which then causes error
+				      'username'	=> 'Gvl '.str_replace('_', ' ', $authData['auEduPersonSharedToken']),
+				      'fullname'	=> $authData['displayName'],
+				      'email'		=> $authData['mail'],
+				      'o'             => $authData['o'],
+				      'auEduPersonSharedToken' => $authData['auEduPersonSharedToken'],
+				      'homeOrganization' => $authData['homeOrganization'],
 		),
 
 		'requirements' => array(
