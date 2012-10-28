@@ -182,7 +182,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		$config['methods'] = array(
 			'local' => array(
 					'login' => array(
-							'text' => 'Local Login/create account: with an account name and password you choose yourself',
+							'text' => 'Local Login (no AAF, manually create username and password)',
 							'href' => SpecialPage::getTitleFor('Userlogin')->escapeFullURL() . '?returnto={RETURN_URL}',
 					),
 			
@@ -926,6 +926,7 @@ class MultiAuthPlugin extends AuthPlugin {
 		if (!$this->isLoggedIn()) {
 			$personal_urls['MA_login'] = array(
 				'text' => wfMsg('multiauth-special_login_link'),
+				/* 'text' => wfMessage('multiauth-special_login_link')->text(), */
 				'href' => $loginLink,
 			);
 		}

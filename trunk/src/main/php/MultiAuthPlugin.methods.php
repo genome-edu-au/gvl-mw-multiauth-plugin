@@ -63,7 +63,7 @@ $config['methods'] = array(
 				),
 			
 		'login' => array(
-			'text' => 'GVL Login (AAF): automatically creates account with your public username being anonymous (randomized)',
+			'text' => 'GVL Login (AAF, automatically creates account)',
 			'href' => WebFunctions::getBaseURL() .  '/Shibboleth.sso/Login?target={RETURN_URL}',
 		),
 	

@@ -151,7 +151,7 @@ $config['internal'] = array(
 	'methods' => array(
 		'local',
 		'shibboleth-anon',
-		'shibboleth-email',
+		/* 'shibboleth-email', */
 		//'simplesamlphp-default',
 			
 		/*
