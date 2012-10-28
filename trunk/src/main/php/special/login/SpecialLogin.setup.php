@@ -64,7 +64,7 @@ function multiAuthLoginSetup() {
 	
 	
 	// aliases
-	if (!MwFunctions::testVersionGEq(1,18))
+	if (MwFunctions::testVersionGEq(1,18))
 		$wgExtensionAliasesFiles['MultiAuthSpecialLogin'] = dirname(__FILE__) . '/SpecialLogin.alias.php';
 
 	$wgExtensionCredits['specialpage']['MultiAuthSpecialLogin'] = array(

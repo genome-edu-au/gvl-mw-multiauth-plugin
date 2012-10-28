@@ -71,7 +71,7 @@ function multiAuthLogoutSetup() {
 	
 	
 	// aliases
-	if (!MwFunctions::testVersionGEq(1,18))
+	if (MwFunctions::testVersionGEq(1,18))
 		$wgExtensionAliasesFiles['MultiAuthSpecialLogout'] = dirname(__FILE__) . '/SpecialLogout.alias.php'; // pre 1.18.0
 
 	
